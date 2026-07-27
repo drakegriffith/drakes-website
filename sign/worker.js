@@ -105,6 +105,23 @@ function authorised(request, env) {
   return crypto.subtle.timingSafeEqual(a, b);
 }
 
+/*
+ * The whole API.
+ *
+ * request  a normal Fetch API Request. The routes: POST /api/sign,
+ *          GET /api/signatures, GET /api/status?email=, POST /api/ban,
+ *          POST /api/unban, GET /api/health. Anything else is a 404.
+ * env      the Worker bindings — `DB`, a D1 database carrying the schema in
+ *          sign/schema.sql, and `ADMIN_TOKEN`, a secret. `DB` is required;
+ *          without `ADMIN_TOKEN` the two admin routes answer 401 forever,
+ *          which is the intended failure.
+ * returns  a Response, always JSON except the 204 preflight, always
+ *          no-store, carrying whatever `{ code, body }` the core resolved to.
+ * effects  none of its own. The core writes a row on a successful sign, and
+ *          updates one on a successful ban or unban.
+ * throws   nothing. A throw from the body reader or the driver becomes a 400
+ *          carrying its message, matching server.js.
+ */
 export default {
   async fetch(request, env) {
     const { pathname, searchParams } = new URL(request.url);

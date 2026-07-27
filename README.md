@@ -62,8 +62,15 @@ printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' \
 
 ## The pledge registry
 
-Local only so far — GitHub Pages is static, so on the live site the form says so
-plainly and records nothing. Deploying it is `tickets/02-registry-prompt.md`.
+The API is deployed: a Cloudflare Worker at
+`https://pledge-registry.cause-effect.workers.dev`, backed by D1. The published
+form does not point at it yet, so on the live site it still says so plainly and
+records nothing. Wiring that up is issue #9.
+
+Two adapters, one set of rules. `sign/registry.mjs` holds the rules and knows
+nothing about HTTP; `sign/server.js` runs them on Node against a local SQLite
+file, `sign/worker.js` runs them on Cloudflare against D1. Deploy with
+`npx wrangler deploy --config sign/wrangler.toml`.
 
 ```bash
 ADMIN_TOKEN=something node sign/server.js   # http://localhost:8787, serves the site too
@@ -77,7 +84,13 @@ curl -X POST localhost:8787/api/ban -H 'x-admin-token: something' \
      -d '{"email":"them@example.com","reason":"Every paragraph the same length."}'
 ```
 
-`sign/signatures.db` is gitignored. It is the only state in this repo.
+The deployed API takes the same call — swap the host, and the token is the one
+in `.secrets/pledge-registry.env`. It allows the Pages origin and localhost and
+nothing else, so a page opened with a `file://` URL cannot sign; use the local
+server for that.
+
+`sign/signatures.db` is gitignored and is the local server's state only. The
+deployed registry's rows live in D1, which nothing in this repo can hold.
 
 ## Notes for Claude
 
