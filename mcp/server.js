@@ -200,6 +200,15 @@ async function handle(request) {
 }
 
 let buffer = "";
+let pending = 0;
+let stdinClosed = false;
+
+// A real client holds stdin open. A piped smoke test does not, and exiting on
+// "end" would kill an in-flight fetch before its answer is written. Wait.
+function maybeExit() {
+  if (stdinClosed && pending === 0) process.exit(0);
+}
+
 process.stdin.setEncoding("utf8");
 process.stdin.on("data", (chunk) => {
   buffer += chunk;
@@ -217,6 +226,7 @@ process.stdin.on("data", (chunk) => {
       continue;
     }
 
+    pending += 1;
     handle(request)
       .then((result) => {
         if (request.id === undefined || request.id === null) return; // notification
@@ -229,8 +239,15 @@ process.stdin.on("data", (chunk) => {
           id: request.id,
           error: { code: e.code || -32603, message: e.message || String(e) },
         });
+      })
+      .finally(() => {
+        pending -= 1;
+        maybeExit();
       });
   }
 });
 
-process.stdin.on("end", () => process.exit(0));
+process.stdin.on("end", () => {
+  stdinClosed = true;
+  maybeExit();
+});
