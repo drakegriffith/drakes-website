@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Drake Griffith - Sign The Pledge</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+
+<div class="topbar">
+<a class="brand" href="index.html">Drake Griffith</a>
+<span class="pill">Open</span>
+<span class="spacer"></span>
+<a class="btn" href="pledge.html">Read It First</a>
+</div>
+
+<p class="nav">
+<a href="index.html">Home</a>
+<a href="blog.html">Blog</a>
+<a href="about.html">About Me</a>
+<a class="here" href="pledge.html">The Pledge</a>
+<a href="mcp.html">MCP</a>
+<a href="links.html">Links</a>
+</p>
+
+<h1>Sign The Pledge</h1>
+<p class="tagline">Name goes in a database. Word goes on the line.</p>
+
+<p>
+Signing gets you a number and a spot on the list. It also gets you the rule:
+if you publish machine-written work on the hub and it is caught, the account is
+banned and the ban is public. That is the entire enforcement model and it fits
+in one sentence, which is more than most platforms can say.
+</p>
+
+<div class="note">
+<ol>
+<li>I wrote this myself. All of it. Including the bad sentence in paragraph three.</li>
+<li>No model drafted it, outlined it, "polished" it, or suggested the ending.</li>
+<li>Spellcheck is fine. Spellcheck has been fine since 1993.</li>
+<li>If I quote a machine, I say so, and I put it in quotes.</li>
+<li>If I break this, I take the post down myself before anyone has to ask.</li>
+</ol>
+</div>
+
+<h2>Sign it</h2>
+
+<form id="sign-form">
+<label for="name">Name</label>
+<input type="text" id="name" name="name" maxlength="120" required>
+
+<label for="email">Email</label>
+<input type="email" id="email" name="email" required>
+
+<label for="url">Website (optional)</label>
+<input type="url" id="url" name="url" placeholder="https://">
+
+<p class="check">
+<label class="check"><input type="checkbox" id="agreed"> I agree to all five, and I wrote my own posts.</label>
+</p>
+
+<p><button type="submit" id="submit">Sign It</button></p>
+</form>
+
+<div id="result" class="result hidden"></div>
+
+<h2>Check a status</h2>
+
+<p>Yours, or anyone's. Bans are public. That is the point of them.</p>
+
+<form id="status-form">
+<label for="check-email">Email</label>
+<input type="email" id="check-email" required>
+<p><button type="submit">Check</button></p>
+</form>
+
+<div id="status-result" class="result hidden"></div>
+
+<h2>Signatories</h2>
+
+<div id="signers-box"><p class="date">Loading the list...</p></div>
+
+<p class="footer">
+&copy; 2026 Drake Griffith. All rights reserved.<br>
+The registry stores a name, an email, and an optional link. Nothing else. There
+is no analytics script on this page because there is no analytics script on any
+page.
+</p>
+
+<script>
+// One knob. Point it at the deployed registry when there is one; on localhost
+// the same server that serves this page also answers /api/*.
+var API = (function () {
+  var local = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+  return local ? "" : "https://pledge-registry.invalid";
+})();
+
+var OFFLINE =
+  "The registry is not deployed yet, so nothing was recorded. Run it locally with " +
+  "<code>node sign/server.js</code>, or email me and I will add you by hand like it is 2010.";
+
+function show(el, ok, html) {
+  el.className = "result " + (ok ? "good" : "bad");
+  el.innerHTML = html;
+}
+
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+  });
+}
+
+function day(iso) {
+  if (!iso) return "";
+  var d = new Date(iso);
+  return isNaN(d) ? iso : d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+}
+
+document.getElementById("sign-form").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var box = document.getElementById("result");
+  var button = document.getElementById("submit");
+  box.classList.remove("hidden");
+  button.disabled = true;
+  show(box, true, "Signing...");
+
+  fetch(API + "/api/sign", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      name: document.getElementById("name").value,
+      email: document.getElementById("email").value,
+      url: document.getElementById("url").value,
+      agreed: document.getElementById("agreed").checked
+    })
+  })
+    .then(function (r) { return r.json().then(function (d) { return { code: r.status, data: d }; }); })
+    .then(function (out) {
+      button.disabled = false;
+      var d = out.data;
+      if (d.status === "banned") {
+        location.href = "banned.html?email=" + encodeURIComponent(document.getElementById("email").value);
+        return;
+      }
+      if (!d.ok) return show(box, false, esc(d.error || "That did not work."));
+      var sig = d.signature;
+      var already = d.status === "already_signed";
+      show(box, true,
+        "<b>" + (already ? "You already signed." : "Signed.") + "</b> " +
+        "You are signatory #" + sig.number + ", " + esc(sig.name) + ", " + day(sig.signed_at) + ".");
+      loadSigners();
+    })
+    .catch(function () {
+      button.disabled = false;
+      show(box, false, OFFLINE);
+    });
+});
+
+document.getElementById("status-form").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var box = document.getElementById("status-result");
+  box.classList.remove("hidden");
+  show(box, true, "Checking...");
+  var email = document.getElementById("check-email").value;
+
+  fetch(API + "/api/status?email=" + encodeURIComponent(email))
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (!d.ok) return show(box, false, esc(d.error || "That did not work."));
+      if (d.status === "unknown") return show(box, true, "Not in the registry. Never signed, never banned.");
+      if (d.status === "banned") {
+        return show(box, false,
+          "<b>Banned.</b> " + esc(d.signature.ban_reason || "Broke the pledge.") +
+          " (" + day(d.signature.banned_at) + ") &mdash; " +
+          "<a href='banned.html?email=" + encodeURIComponent(email) + "'>see the notice</a>");
+      }
+      show(box, true, "<b>Good standing.</b> Signatory #" + d.signature.number + ", signed " + day(d.signature.signed_at) + ".");
+    })
+    .catch(function () { show(box, false, OFFLINE); });
+});
+
+function loadSigners() {
+  var box = document.getElementById("signers-box");
+  fetch(API + "/api/signatures")
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (!d.signatures || !d.signatures.length) {
+        box.innerHTML = "<p>Nobody yet. Be signatory number one.</p>";
+        return;
+      }
+      var rows = d.signatures.map(function (s) {
+        var who = s.url ? "<a href='" + esc(s.url) + "'>" + esc(s.name) + "</a>" : esc(s.name);
+        var flag = s.status === "banned" ? " <span class='flag'>[BANNED: " + esc(s.ban_reason) + "]</span>" : "";
+        return "<li><span>#" + s.number + " " + who + flag + "</span><span class='date'>" + day(s.signed_at) + "</span></li>";
+      });
+      box.innerHTML =
+        "<p>" + d.count + " in good standing" + (d.banned ? ", " + d.banned + " banned" : "") + ".</p>" +
+        "<ul class='signers'>" + rows.join("") + "</ul>";
+    })
+    .catch(function () {
+      box.innerHTML = "<p class='date'>Registry offline. No list to show yet.</p>";
+    });
+}
+
+loadSigners();
+</script>
+
+</body>
+</html>

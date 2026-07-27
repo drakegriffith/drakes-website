@@ -9,6 +9,7 @@
 - [Blog](https://drakegriffith.github.io/drakes-website/blog.html)
 - [About Me](https://drakegriffith.github.io/drakes-website/about.html)
 - [The Pledge](https://drakegriffith.github.io/drakes-website/pledge.html)
+- [Sign The Pledge](https://drakegriffith.github.io/drakes-website/sign.html)
 - [MCP](https://drakegriffith.github.io/drakes-website/mcp.html)
 - [Links](https://drakegriffith.github.io/drakes-website/links.html)
 

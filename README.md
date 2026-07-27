@@ -13,6 +13,8 @@ index.html        home page + latest posts
 blog.html         full post list
 about.html        one paragraph + photos
 pledge.html       the No-AI blog hub pledge (manifesto; hub not built yet)
+sign.html         signature form + status lookup + signatory list
+banned.html       the red ban notice (reads the reason from the registry)
 mcp.html          how agents should read this site
 links.html        email / github / machine endpoints
 style.css         the entire design system
@@ -22,6 +24,8 @@ build-feed.py     regenerates feed.json + llms.txt from blog/*.html
 feed.json         GENERATED - every post, full text, one request
 llms.txt          GENERATED - the map, plain text
 mcp/server.js     MCP server (zero deps, stdio) exposing the site to agents
+sign/server.js    pledge registry: SQLite, zero deps, also serves the site locally
+tickets/          paste-ready prompts for the hub build and the registry deploy
 blog/             one .html file per post
 images/           photos
 HUB.md            design notes for the pledge hub (detector + RAG search)
@@ -55,6 +59,25 @@ Tools: `list_posts`, `get_post`, `search_posts`, `get_pledge`. Details in
 printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' \
               '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' | node mcp/server.js
 ```
+
+## The pledge registry
+
+Local only so far — GitHub Pages is static, so on the live site the form says so
+plainly and records nothing. Deploying it is `tickets/02-registry-prompt.md`.
+
+```bash
+ADMIN_TOKEN=something node sign/server.js   # http://localhost:8787, serves the site too
+```
+
+Ban someone:
+
+```bash
+curl -X POST localhost:8787/api/ban -H 'x-admin-token: something' \
+     -H 'content-type: application/json' \
+     -d '{"email":"them@example.com","reason":"Every paragraph the same length."}'
+```
+
+`sign/signatures.db` is gitignored. It is the only state in this repo.
 
 ## Notes for Claude
 

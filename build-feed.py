@@ -70,6 +70,7 @@ def main() -> None:
             {"title": "Blog", "url": f"{SITE}/blog.html"},
             {"title": "About Me", "url": f"{SITE}/about.html"},
             {"title": "The Pledge", "url": f"{SITE}/pledge.html"},
+            {"title": "Sign The Pledge", "url": f"{SITE}/sign.html"},
             {"title": "MCP", "url": f"{SITE}/mcp.html"},
             {"title": "Links", "url": f"{SITE}/links.html"},
         ],

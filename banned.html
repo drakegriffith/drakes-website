@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Drake Griffith - Banned</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+
+<div class="topbar">
+<a class="brand" href="index.html">Drake Griffith</a>
+<span class="pill">Live</span>
+<span class="spacer"></span>
+<a class="btn" href="pledge.html">The Pledge</a>
+</div>
+
+<p class="nav">
+<a href="index.html">Home</a>
+<a href="blog.html">Blog</a>
+<a href="about.html">About Me</a>
+<a class="here" href="pledge.html">The Pledge</a>
+<a href="mcp.html">MCP</a>
+<a href="links.html">Links</a>
+</p>
+
+<p class="banner-ban">YOU HAVE BEEN BANNED</p>
+<p class="banner-sub">A machine wrote it. You signed something that said it would not.</p>
+
+<div class="ban-box">
+<p id="detail"><b>Reason:</b> Broke the pledge.</p>
+<p id="who" class="date"></p>
+</div>
+
+<h2>What happened</h2>
+
+<p>
+You signed the <a href="pledge.html">pledge</a>. The pledge has five lines and
+the first one is "I wrote this myself." A submission came in that a human read,
+a detector flagged, and the human agreed with. That is the order those two
+things go in, always.
+</p>
+
+<h2>What now</h2>
+
+<ul>
+<li>Your posts stay down.</li>
+<li>The ban is public. It shows up next to your name on the <a href="sign.html">signatory list</a>, permanently.</li>
+<li>You can still read everything. Nobody gets locked out of reading.</li>
+</ul>
+
+<h2>If this is wrong</h2>
+
+<p>
+It might be. Detectors are wrong sometimes and I have said so in writing, on the
+<a href="pledge.html">pledge page</a>, before this ever happened to anybody. So
+if this is a mistake, reply with the drafts, the timestamps, the notes, whatever
+you actually have. A person will read it and a person will decide, same as
+before.
+</p>
+
+<p><a class="btn" href="mailto:christopherg@actualintelligencelabs.ai?subject=Appeal">Appeal It</a></p>
+
+<p class="footer">
+&copy; 2026 Drake Griffith. All rights reserved.<br>
+This page is red on purpose. It is the only red on the entire website.
+</p>
+
+<script>
+// Pull the real reason out of the registry when there is one; otherwise this
+// page still reads fine, which is the point of writing the default in the HTML.
+(function () {
+  var email = new URLSearchParams(location.search).get("email");
+  if (!email) return;
+
+  var local = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+  var API = local ? "" : "https://pledge-registry.invalid";
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+
+  fetch(API + "/api/status?email=" + encodeURIComponent(email))
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (!d.ok || d.status !== "banned") return;
+      var s = d.signature;
+      document.getElementById("detail").innerHTML = "<b>Reason:</b> " + esc(s.ban_reason);
+      var when = s.banned_at ? new Date(s.banned_at) : null;
+      document.getElementById("who").textContent =
+        "Signatory #" + s.number + ", " + s.name + ". Banned " +
+        (when && !isNaN(when) ? when.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : s.banned_at) + ".";
+    })
+    .catch(function () {});
+})();
+</script>
+
+</body>
+</html>
