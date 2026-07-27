@@ -1,35 +1,165 @@
 /*
  * The pledge registry, as a Cloudflare Worker.
  *
- * Placeholder. Right now this only proves the deploy works and the D1 binding
- * is wired; the real endpoints land with the port (issue #4), which will make
- * this a thin adapter over sign/registry.js — the same core server.js uses.
+ * The second adapter over sign/registry.mjs — the same rules sign/server.js
+ * runs locally. This file owns HTTP, CORS, the admin token, and a D1-backed
+ * store; the rules live next door and are shared byte for byte.
  *
- *   npx wrangler deploy   --config sign/wrangler.toml
- *   npx wrangler dev      --config sign/wrangler.toml
+ *   npx wrangler deploy --config sign/wrangler.toml
+ *   npx wrangler dev    --config sign/wrangler.toml   # local D1, port 8787
  *
- * Unlike server.js this serves no static files. GitHub Pages already does
- * that; the Worker is API-only.
+ * Unlike server.js this serves no static files. GitHub Pages already does that
+ * job; the Worker is API-only. It also never creates the table — the schema is
+ * applied to D1 by hand from sign/schema.sql.
+ *
+ * ---------------------------------------------------------------------------
+ * CORS
+ * ---------------------------------------------------------------------------
+ *
+ * server.js allows `*` because it is a local preview that also serves the page
+ * asking. Deployed, `*` on a write endpoint invites exactly the drive-by
+ * traffic the rate limiter exists for, so this narrows to the site's own
+ * origin plus localhost (any port, so `wrangler dev` and `node sign/server.js`
+ * both keep working against the deployed API).
+ *
+ * A request with no Origin header — curl, the ban script — is not a browser
+ * request and is untouched: CORS is a browser rule, and nothing here treats it
+ * as authentication. A disallowed origin gets a normal response with no CORS
+ * headers, which is what makes the browser refuse to hand it over.
+ *
+ * A page opened with a file:// URL sends `Origin: null` and is therefore
+ * denied. Open the site through `node sign/server.js` instead, which serves
+ * page and API from one origin.
  */
+
+import * as registry from "./registry.mjs";
+
+const PAGES_ORIGIN = "https://drakegriffith.github.io";
+const LOCAL_ORIGIN = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+
+/* Matches server.js. The real cap is a rate-limit question — see issue #5. */
+const MAX_BODY = 64 * 1024;
+
+const JSON_HEADERS = {
+  "content-type": "application/json; charset=utf-8",
+  "cache-control": "no-store",
+};
+
+function corsHeaders(request) {
+  const origin = request.headers.get("origin");
+  if (!origin) return {};
+  if (origin !== PAGES_ORIGIN && !LOCAL_ORIGIN.test(origin)) return {};
+  return {
+    "access-control-allow-origin": origin,
+    "access-control-allow-headers": "content-type, x-admin-token",
+    "access-control-allow-methods": "GET, POST, OPTIONS",
+    vary: "origin",
+  };
+}
+
+function json(request, code, body) {
+  return new Response(JSON.stringify(body), {
+    status: code,
+    headers: { ...JSON_HEADERS, ...corsHeaders(request) },
+  });
+}
+
+/* The store port, backed by D1. Same SQL, same rows, already async. */
+function d1Store(db) {
+  return {
+    async query(sql, params) {
+      const stmt = params.length ? db.prepare(sql).bind(...params) : db.prepare(sql);
+      const { results } = await stmt.all();
+      return results || [];
+    },
+  };
+}
+
+async function readBody(request) {
+  const raw = await request.text();
+  if (raw.length > MAX_BODY) throw new Error("body too large");
+  if (!raw.trim()) return {};
+  try {
+    return JSON.parse(raw);
+  } catch (e) {
+    throw new Error("body is not valid JSON");
+  }
+}
+
+/*
+ * Admin auth. `crypto.subtle.timingSafeEqual` is the Workers runtime's answer
+ * to node:crypto's, and it throws on a length mismatch, so length is checked
+ * first — leaking the token's length is not worth a compat flag to avoid.
+ *
+ * With no ADMIN_TOKEN bound, every admin call is unauthorised. A Worker with
+ * no secret should refuse bans, not accept a default one.
+ */
+function authorised(request, env) {
+  if (!env.ADMIN_TOKEN) return false;
+  const given = request.headers.get("x-admin-token");
+  if (!given) return false;
+  const encoder = new TextEncoder();
+  const a = encoder.encode(given);
+  const b = encoder.encode(env.ADMIN_TOKEN);
+  if (a.byteLength !== b.byteLength) return false;
+  return crypto.subtle.timingSafeEqual(a, b);
+}
 
 export default {
   async fetch(request, env) {
-    const { pathname } = new URL(request.url);
+    const { pathname, searchParams } = new URL(request.url);
+    const method = request.method;
+    const send = (out) => json(request, out.code, out.body);
 
-    if (pathname === "/api/health") {
-      let db = "unreachable";
-      try {
-        const row = await env.DB.prepare("SELECT COUNT(*) AS n FROM signatures").first();
-        db = `ok, ${row.n} row(s)`;
-      } catch (e) {
-        db = `error: ${e.message}`;
-      }
-      return Response.json({ ok: true, service: "pledge-registry", db });
+    if (method === "OPTIONS") {
+      return new Response(null, { status: 204, headers: corsHeaders(request) });
     }
 
-    return Response.json(
-      { ok: false, error: "The registry is deployed but not yet wired up. See issue #4." },
-      { status: 501 },
-    );
+    if (!pathname.startsWith("/api/")) {
+      return json(request, 404, {
+        ok: false,
+        error: "This is the pledge registry API. The site is at https://drakegriffith.github.io/drakes-website/",
+      });
+    }
+
+    const store = d1Store(env.DB);
+
+    try {
+      /* Not part of the frozen contract: a deploy check, and the one place the
+       * D1 binding proves itself without touching a signature. */
+      if (method === "GET" && pathname === "/api/health") {
+        let db = "unreachable";
+        try {
+          const row = await env.DB.prepare("SELECT COUNT(*) AS n FROM signatures").first();
+          db = `ok, ${row.n} row(s)`;
+        } catch (e) {
+          db = `error: ${e.message}`;
+        }
+        return json(request, 200, { ok: true, service: "pledge-registry", db });
+      }
+
+      if (method === "GET" && pathname === "/api/signatures") {
+        return send(await registry.listSignatures(store));
+      }
+
+      if (method === "GET" && pathname === "/api/status") {
+        return send(await registry.status(store, searchParams.get("email")));
+      }
+
+      if (method === "POST" && pathname === "/api/sign") {
+        return send(await registry.sign(store, await readBody(request)));
+      }
+
+      if (method === "POST" && (pathname === "/api/ban" || pathname === "/api/unban")) {
+        if (!authorised(request, env)) {
+          return json(request, 401, { ok: false, error: "Admin token required." });
+        }
+        return send(await registry.setBan(store, await readBody(request), pathname === "/api/ban"));
+      }
+
+      return json(request, 404, { ok: false, error: `No such endpoint: ${pathname}` });
+    } catch (e) {
+      return json(request, 400, { ok: false, error: e.message || String(e) });
+    }
   },
 };

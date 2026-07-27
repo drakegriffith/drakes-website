@@ -83,11 +83,19 @@ function send(res, out) {
 function readBody(req) {
   return new Promise((resolve, reject) => {
     let raw = "";
+    let over = false;
     req.on("data", (chunk) => {
+      /* Over the cap, drop what arrives but keep reading: destroying the
+       * socket here would kill the connection before the 400 could be
+       * written, and the caller would see a dropped request instead of an
+       * error. The Worker has no way to destroy a socket mid-upload, so this
+       * is also what keeps the two adapters answering alike. */
+      if (over) return;
       raw += chunk;
       if (raw.length > 64 * 1024) {
+        over = true;
+        raw = "";
         reject(new Error("body too large"));
-        req.destroy();
       }
     });
     req.on("end", () => {
