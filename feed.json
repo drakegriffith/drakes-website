@@ -38,7 +38,7 @@
       "url": "https://drakegriffith.github.io/drakes-website/links.html"
     }
   ],
-  "count": 2,
+  "count": 3,
   "posts": [
     {
       "slug": "2026-07-26-two-ai-reviewers",
@@ -61,6 +61,17 @@
       "words": 31,
       "excerpt": "This is the first post. The point of having your own website is being able to post whatever you want on it without asking anyone. So here it is. More soon.",
       "text": "This is the first post. The point of having your own website is being able to\npost whatever you want on it without asking anyone. So here it is.\n\nMore soon."
+    },
+    {
+      "slug": "2026-07-26-building-this-right-now-with-wayfinder",
+      "title": "Building this right now with Wayfinder",
+      "date": "July 26, 2026",
+      "date_iso": "2026-07-26",
+      "url": "https://drakegriffith.github.io/drakes-website/blog/2026-07-26-building-this-right-now-with-wayfinder.html",
+      "path": "blog/2026-07-26-building-this-right-now-with-wayfinder.html",
+      "words": 39,
+      "excerpt": "Building this right now with Wayfinder. Shout out Matt Pocock. I know a two-line status update is not a blog post. It is my website. I can do what I want, which was the entire reason for building it.",
+      "text": "Building this right now with Wayfinder. Shout out Matt Pocock.\n\nI know a two-line status update is not a blog post. It is my website. I can do what I want, which was the entire reason for building it."
     }
   ]
 }
