@@ -3,5 +3,8 @@ sign/*.db-journal
 sign/*.db-wal
 draft.txt
 sign/.wrangler/
+sign/.dev.vars
+.dev.vars
+*.env
 .wrangler/
 .scratch/
