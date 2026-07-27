@@ -1,0 +1,20 @@
+# Cloudflare config for the pledge registry.
+#
+# Deliberately in sign/ and not at the repo root. The root has no package.json,
+# no build step and no toolchain, and that is load-bearing — the site is plain
+# HTML you can open with a file:// URL. The registry is the one part that needs
+# a server, so its toolchain stays fenced in here.
+#
+#   npx wrangler deploy --config sign/wrangler.toml
+#
+# No local wrangler install and no node_modules: npx fetches it per invocation.
+
+name = "pledge-registry"
+main = "worker.js"
+compatibility_date = "2026-07-01"
+workers_dev = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "pledge-registry"
+database_id = "47760aae-4595-4d60-834f-e1d13bbafa42"

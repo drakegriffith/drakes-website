@@ -2,3 +2,6 @@ sign/signatures.db
 sign/*.db-journal
 sign/*.db-wal
 draft.txt
+sign/.wrangler/
+.wrangler/
+.scratch/
