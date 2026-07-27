@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>I Asked Two AI Models To Destroy My Work - Drake Griffith</title>
+<link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+<h1>I asked two AI models to destroy my work. They disagreed about how.</h1>
+<p class="date">July 26, 2026</p>
+
+<hr>
+<p class="nav">
+<a href="../index.html">Home</a> |
+<a href="../blog.html">Blog</a> |
+<a href="../about.html">About Me</a> |
+<a href="../links.html">Links</a>
+</p>
+<hr>
+
+<p>
+For the last few weeks I have been designing a piece of software, and before any
+decision gets locked I hand the write-up to two AI models and ask them to break
+it. Kimi and Codex. Same brief, sent in parallel. Neither can see the other's
+response, and neither remembers the last round.
+</p>
+
+<p>
+The setup was meant to catch my mistakes, which it does. It also taught me
+something about reviewing that I did not go looking for.
+</p>
+
+<h2>Same brief, different reviewers</h2>
+
+<p>
+The important detail first, because it is what makes the rest meaningful: both
+models get the identical file. Same bytes. Same opening line telling them they
+are an adversarial reviewer and should default to skepticism. Neither one is
+told to be harsher than the other.
+</p>
+
+<p>
+Here is what came back on the same document, on the same day.
+</p>
+
+<table border="1" cellpadding="5" cellspacing="0">
+<tr>
+<th>&nbsp;</th>
+<th>Kimi</th>
+<th>Codex</th>
+</tr>
+<tr>
+<td>words</td>
+<td>2,706</td>
+<td>1,915</td>
+</tr>
+<tr>
+<td>numeric claims</td>
+<td>15</td>
+<td>6</td>
+</tr>
+<tr>
+<td>bullet points</td>
+<td>31</td>
+<td>88</td>
+</tr>
+<tr>
+<td>average sentence length</td>
+<td>31.8 words</td>
+<td>31.9 words</td>
+</tr>
+</table>
+
+<p>
+Average sentence length matches to a tenth of a word, so neither is padding.
+What differs is where they go.
+</p>
+
+<p>
+Kimi is the empiricist. It re-ran my measurement script, without being asked to,
+and compared its own output against the figures I had published. That is how it
+found the error: I had been counting text written by AI subagents as though a
+human had typed it. I published 10.6 percent as 14.4 percent. It then quoted my
+own script's documentation back at me, which had warned against exactly that
+mistake. I had written the warning and then ignored it.
+</p>
+
+<p>
+Codex is the structuralist. It went looking for my experiments folder before
+reading anything, and attacked the shape of my argument rather than its
+arithmetic. Its finding was that my headline metric multiplied five rates
+measured over four different populations. The arithmetic was correct. The number
+meant nothing.
+</p>
+
+<p>
+Then both of them opened with the same two objections. They run in parallel,
+memoryless, unable to coordinate. That agreement carried more weight than either
+review alone, and it convinced me to rebuild the document rather than patch it.
+</p>
+
+<h2>The two days I spent trying to make one of them fair</h2>
+
+<p>
+Kimi has a habit that took me a while to understand. It never stops. Every round
+produces fresh criticism, all of it individually defensible, and I could keep
+revising forever without ever arriving at "this is finished."
+</p>
+
+<p>
+For a while I read that as temperament, so I tried to fix it the way everyone
+tries to fix it. I rewrote the instructions.
+</p>
+
+<p>
+I ran this properly, over three days in July, with a sealed holdout set and a
+pre-registered decision rule. The question was narrow: can any wording make this
+model a useful pass-or-fail gate on a specification? I gave it more context, then
+less. I told it to be harsher. I told it to be gentler. I moved the stated
+failure rate up and down, and the stated cost of missing something.
+</p>
+
+<p>
+The answer was no, and the shape of the no is the part worth having.
+</p>
+
+<p>
+It flagged 82 percent of specifications when 35 percent of them were actually
+bad. A rubber stamp that read nothing and approved everything scored better than
+every prompt I wrote. On obviously good specs and obviously terrible ones it was
+perfect. On real ones it was a coin flip.
+</p>
+
+<p>
+Every tone lever moved the flag rate and none of them improved the accuracy.
+Tilting it toward flagging produced nine false alarms and zero real catches. Its
+sense of what looks risky turns out to be uncorrelated with what is actually
+broken. This is the finding I keep coming back to, because "just tell it to be
+more critical" is the first thing anyone reaches for and it is worse than
+useless. It produces more noise that feels like more rigour.
+</p>
+
+<p>
+More instruction made it monotonically worse. Every added distinction raised its
+flagging without adding a single new catch. One rewrite collapsed it into
+approving everything.
+</p>
+
+<p>
+My best configuration scored 44 out of 50 on the data I tuned it against, then
+caught zero of three real failures on the sealed holdout. It had memorised the
+phrasing of the examples I let it see rather than learning anything.
+</p>
+
+<p>
+I filed the whole thing as a failed experiment and moved on.
+</p>
+
+<h2>It was not a failed experiment</h2>
+
+<p>
+Three days later I was writing up the review process and realised the null result
+was the load-bearing part.
+</p>
+
+<p>
+The model that loses to a rubber stamp on pass-or-fail is the same model that
+re-ran my script and caught a real error in my published numbers. Both of those
+are true at once, and I had been treating them as one purchase.
+</p>
+
+<p>
+Finding things and judging things are separate skills, and this reviewer has one
+of them.
+</p>
+
+<p>
+So the process I ended up with never asks a model for a verdict. It asks for
+findings, and every finding has to cite a line, a number, or a specific
+inference. Anything that cannot point at something is advisory by default.
+Findings get sorted into fatal, material, and advisory, and only fatal blocks
+acceptance.
+</p>
+
+<p>
+Review stops when a round produces nothing fatal, with a hard cap of three
+rounds. And the rule that actually made it terminate: later rounds may only check
+whether earlier findings were resolved. They may not open new ground. New ground
+becomes a separate task.
+</p>
+
+<p>
+Without that last rule, every round legitimately discovers something new, because
+any document is infinitely criticisable, and the sequence never ends. With it,
+the loop is bounded by the first round's findings, which is a finite list. The
+reviewer stopped being the thing that decides when I am done, which was the real
+problem all along. Before, that decision was made by whatever hour I ran out of
+patience.
+</p>
+
+<h2>A postscript about losing my own work</h2>
+
+<p>
+While writing this I could not find the three-day experiment I just described. It
+was on my own laptop, committed to git, in a folder two directories from where I
+was working, finished the previous week.
+</p>
+
+<p>
+I searched for "prompt engineering." I searched for "tone" across 3,483
+conversation transcripts. I ran a full content search across every project folder
+for "harsh," "be kind," and half a dozen similar phrases. All of it came back
+empty, or came back with results about email etiquette.
+</p>
+
+<p>
+The document that answered the question was sitting right there. It just never
+uses those words. It says propensity levers, base rate, cost asymmetry, flag
+rate. I had named the work for what it measured, and I went looking for it using
+the words I would have described it with months later. Both descriptions are
+correct. They share no vocabulary.
+</p>
+
+<p>
+What eventually found it was listing my folders by date and reading the names.
+</p>
+
+<p>
+Nothing was lost, corrupted, or missing. Storage was perfect. Retrieval failed
+completely, on the gap between how I filed something and how I later asked for
+it. That is a more honest argument for better search than any benchmark I could
+have designed, and I got it by accident, from failing at it.
+</p>
+
+<h2>Two caveats, because they matter</h2>
+
+<p>
+The prompt was identical for both models. The surrounding software was not: each
+runs through its own command line tool with its own defaults. The comparison is
+controlled on instructions and imperfectly controlled on environment, and a
+cleaner version of this would hold both fixed.
+</p>
+
+<p>
+The calibration result is about one model at one task, gating specifications. It
+is not a claim about that model generally, and it is certainly not a claim about
+the others. What generalises is the method: measure your reviewer against a
+baseline that does nothing before you trust its verdicts, because a reviewer that
+flags most things can look rigorous while carrying no information at all.
+</p>
+
+<hr>
+<p><a href="../blog.html">&laquo; Back to blog</a></p>
+
+<p class="footer">
+&copy; 2026 Drake Griffith. All rights reserved.
+</p>
+
+</body>
+</html>
