@@ -1,22 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Drake Griffith - Home Page</title>
 <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
 
-<h1>Drake Griffith</h1>
-<p><i>Welcome to my website.</i></p>
+<div class="topbar">
+<a class="brand" href="index.html">Drake Griffith</a>
+<span class="pill">Live</span>
+<span class="spacer"></span>
+<a class="btn" href="mailto:christopherg@actualintelligencelabs.ai">Email Me</a>
+</div>
 
-<hr>
 <p class="nav">
-<a href="index.html">Home</a> |
-<a href="blog.html">Blog</a> |
-<a href="about.html">About Me</a> |
+<a class="here" href="index.html">Home</a>
+<a href="blog.html">Blog</a>
+<a href="about.html">About Me</a>
+<a href="pledge.html">The Pledge</a>
+<a href="mcp.html">MCP</a>
 <a href="links.html">Links</a>
 </p>
-<hr>
+
+<p class="tagline">Welcome to my website.</p>
 
 <h2>Welcome</h2>
 
@@ -26,22 +34,49 @@ posting them on a platform that will change its font in two years.
 </p>
 
 <p>
+It looks like 2010 because 2010 loaded instantly and nobody had to accept
+cookies to read a paragraph. There is no framework here. There is one CSS file
+and a bash script. The whole site weighs less than the average tracking pixel
+budget and it will still open in fifteen years.
+</p>
+
+<p>
 Go to the <a href="blog.html">blog</a> to read the posts.
+</p>
+
+<h2>Two things worth knowing</h2>
+
+<p>
+<b><a href="pledge.html">The Pledge</a>.</b> I am building a blog hub where
+anyone can publish and nobody is allowed to use AI, enforced by a slop detector
+that flags rather than deletes, because a model should never get the final vote.
+I build agent systems for a living, which is exactly why I want one place that
+is only people.
+</p>
+
+<p>
+<b><a href="mcp.html">MCP</a>.</b> This 2010 website speaks Model Context
+Protocol. Agents kept scraping it badly, so now there is a real endpoint, a
+<a href="feed.json">feed.json</a>, and a server your assistant can talk to. The
+most machine-readable site I own is also the one that renders fine in Netscape.
+Those were never opposites.
 </p>
 
 <h2>Latest Posts</h2>
 
+<div class="posts">
 <!-- LATEST_START -->
 <ul>
-<li><a href="blog/2026-07-26-two-ai-reviewers.html">I asked two AI models to destroy my work. They disagreed about how.</a> &mdash; <span class="date">July 26, 2026</span></li>
-<li><a href="blog/2026-07-26-hello-world.html">Hello World</a> &mdash; <span class="date">July 26, 2026</span></li>
+<li><a href="blog/2026-07-26-two-ai-reviewers.html">I asked two AI models to destroy my work. They disagreed about how.</a> <span class="date">July 26, 2026</span></li>
+<li><a href="blog/2026-07-26-hello-world.html">Hello World</a> <span class="date">July 26, 2026</span></li>
 </ul>
 <!-- LATEST_END -->
+</div>
 
-<hr>
 <p class="footer">
 Last updated: July 26, 2026<br>
 Best viewed in 1024x768.<br>
+Written by a human. Readable by machines. <a href="mcp.html">Both on purpose.</a><br>
 &copy; 2026 Drake Griffith. All rights reserved.
 </p>
 

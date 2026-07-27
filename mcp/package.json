@@ -1,0 +1,10 @@
+{
+  "name": "drakes-website-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for drakegriffith.github.io/drakes-website. A 2010 website that speaks to agents.",
+  "bin": { "drakes-website-mcp": "./server.js" },
+  "main": "server.js",
+  "license": "MIT",
+  "engines": { "node": ">=18" },
+  "dependencies": {}
+}

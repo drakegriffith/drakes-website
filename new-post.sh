@@ -50,8 +50,8 @@ tpl = pathlib.Path("_template.html").read_text()
 post = tpl.replace("{{TITLE}}", html.escape(title)).replace("{{DATE}}", pretty).replace("{{BODY}}", body)
 post_path.write_text(post)
 
-entry = (f'<li><a href="{{prefix}}blog/{iso}-{slug}.html">{html.escape(title)}</a> '
-         f'&mdash; <span class="date">{pretty}</span></li>')
+entry = (f'<li><a href="{{prefix}}blog/{iso}-{slug}.html">{html.escape(title)}</a>'
+         f'<span class="date">{pretty}</span></li>')
 
 def insert(page, start, end, prefix, limit=None):
     text = pathlib.Path(page).read_text()
@@ -72,6 +72,9 @@ home.write_text(re.sub(r"Last updated: [^<]*", f"Last updated: {pretty}", home.r
 
 print(post_path)
 PY
+
+# refresh the machine-readable copies of the site (feed.json, llms.txt)
+python3 build-feed.py
 
 if [ "$PUBLISH" = "yes" ]; then
   git add -A

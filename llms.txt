@@ -1,0 +1,28 @@
+# Drake Griffith
+
+> Personal website. Written by a human, on purpose, in Times New Roman.
+> Machine-readable index of everything here. Full text lives in feed.json.
+
+## Pages
+
+- [Home](https://drakegriffith.github.io/drakes-website/index.html)
+- [Blog](https://drakegriffith.github.io/drakes-website/blog.html)
+- [About Me](https://drakegriffith.github.io/drakes-website/about.html)
+- [The Pledge](https://drakegriffith.github.io/drakes-website/pledge.html)
+- [MCP](https://drakegriffith.github.io/drakes-website/mcp.html)
+- [Links](https://drakegriffith.github.io/drakes-website/links.html)
+
+## Posts
+
+- [I asked two AI models to destroy my work. They disagreed about how.](https://drakegriffith.github.io/drakes-website/blog/2026-07-26-two-ai-reviewers.html): July 26, 2026, 1301 words. For the last few weeks I have been designing a piece of software, and before any decision gets locked I hand the write-up to two AI models and ask them to break
+- [Hello World](https://drakegriffith.github.io/drakes-website/blog/2026-07-26-hello-world.html): July 26, 2026, 31 words. This is the first post. The point of having your own website is being able to post whatever you want on it without asking anyone. So here it is. More soon.
+
+## Machine access
+
+- [feed.json](https://drakegriffith.github.io/drakes-website/feed.json): every post, full text, one request.
+- [MCP server](https://drakegriffith.github.io/drakes-website/mcp.html): point your agent at it instead of scraping me.
+
+## Terms
+
+- Quote it with a link. Summarise it honestly.
+- Do not train on it. I will never know, but you will.

@@ -1,32 +1,46 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Drake Griffith - Blog</title>
 <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
 
-<h1>Blog</h1>
+<div class="topbar">
+<a class="brand" href="index.html">Drake Griffith</a>
+<span class="spacer"></span>
+<a class="btn" href="mailto:christopherg@actualintelligencelabs.ai">Email Me</a>
+</div>
 
-<hr>
 <p class="nav">
-<a href="index.html">Home</a> |
-<a href="blog.html">Blog</a> |
-<a href="about.html">About Me</a> |
+<a href="index.html">Home</a>
+<a class="here" href="blog.html">Blog</a>
+<a href="about.html">About Me</a>
+<a href="pledge.html">The Pledge</a>
+<a href="mcp.html">MCP</a>
 <a href="links.html">Links</a>
 </p>
-<hr>
 
-<p>All posts, newest first.</p>
+<h1>Blog</h1>
+<p class="tagline">All posts, newest first. All of them written by hand, which is now a feature.</p>
 
+<div class="posts">
 <!-- POSTS_START -->
 <ul>
-<li><a href="blog/2026-07-26-two-ai-reviewers.html">I asked two AI models to destroy my work. They disagreed about how.</a> &mdash; <span class="date">July 26, 2026</span></li>
-<li><a href="blog/2026-07-26-hello-world.html">Hello World</a> &mdash; <span class="date">July 26, 2026</span></li>
+<li><a href="blog/2026-07-26-two-ai-reviewers.html">I asked two AI models to destroy my work. They disagreed about how.</a> <span class="date">July 26, 2026</span></li>
+<li><a href="blog/2026-07-26-hello-world.html">Hello World</a> <span class="date">July 26, 2026</span></li>
 </ul>
 <!-- POSTS_END -->
+</div>
 
-<hr>
+<p>
+No RSS yet. There is <a href="feed.json">feed.json</a>, which is the same idea
+with fewer angle brackets, and an <a href="mcp.html">MCP server</a> if you would
+rather your assistant read it for you.
+</p>
+
 <p class="footer">
 &copy; 2026 Drake Griffith. All rights reserved.
 </p>

@@ -1,0 +1,62 @@
+{
+  "site": "Drake Griffith",
+  "url": "https://drakegriffith.github.io/drakes-website/",
+  "description": "A personal website that looks like 2010 and reads like a person wrote it, because one did.",
+  "author": "Drake Griffith",
+  "human_written": true,
+  "ai_written": false,
+  "license": "Read it. Quote it with a link. Do not train a slop machine on it.",
+  "generated": "2026-07-26",
+  "mcp": "https://drakegriffith.github.io/drakes-website/mcp.html",
+  "pages": [
+    {
+      "title": "Home",
+      "url": "https://drakegriffith.github.io/drakes-website/index.html"
+    },
+    {
+      "title": "Blog",
+      "url": "https://drakegriffith.github.io/drakes-website/blog.html"
+    },
+    {
+      "title": "About Me",
+      "url": "https://drakegriffith.github.io/drakes-website/about.html"
+    },
+    {
+      "title": "The Pledge",
+      "url": "https://drakegriffith.github.io/drakes-website/pledge.html"
+    },
+    {
+      "title": "MCP",
+      "url": "https://drakegriffith.github.io/drakes-website/mcp.html"
+    },
+    {
+      "title": "Links",
+      "url": "https://drakegriffith.github.io/drakes-website/links.html"
+    }
+  ],
+  "count": 2,
+  "posts": [
+    {
+      "slug": "2026-07-26-two-ai-reviewers",
+      "title": "I asked two AI models to destroy my work. They disagreed about how.",
+      "date": "July 26, 2026",
+      "date_iso": "2026-07-26",
+      "url": "https://drakegriffith.github.io/drakes-website/blog/2026-07-26-two-ai-reviewers.html",
+      "path": "blog/2026-07-26-two-ai-reviewers.html",
+      "words": 1301,
+      "excerpt": "For the last few weeks I have been designing a piece of software, and before any decision gets locked I hand the write-up to two AI models and ask them to break it. Kimi and Codex. Same brief, sent in parallel. Neither can see the other's response, and neither remembers the last",
+      "text": "For the last few weeks I have been designing a piece of software, and before any\ndecision gets locked I hand the write-up to two AI models and ask them to break\nit. Kimi and Codex. Same brief, sent in parallel. Neither can see the other's\nresponse, and neither remembers the last round.\n\nThe setup was meant to catch my mistakes, which it does. It also taught me\nsomething about reviewing that I did not go looking for.\n\nSame brief, different reviewers\n\nThe important detail first, because it is what makes the rest meaningful: both\nmodels get the identical file. Same bytes. Same opening line telling them they\nare an adversarial reviewer and should default to skepticism. Neither one is\ntold to be harsher than the other.\n\nHere is what came back on the same document, on the same day.\n\nKimi \n Codex \n\nwords \n 2,706 \n 1,915 \n\nnumeric claims \n 15 \n 6 \n\nbullet points \n 31 \n 88 \n\naverage sentence length \n 31.8 words \n 31.9 words \n\nAverage sentence length matches to a tenth of a word, so neither is padding.\nWhat differs is where they go.\n\nKimi is the empiricist. It re-ran my measurement script, without being asked to,\nand compared its own output against the figures I had published. That is how it\nfound the error: I had been counting text written by AI subagents as though a\nhuman had typed it. I published 10.6 percent as 14.4 percent. It then quoted my\nown script's documentation back at me, which had warned against exactly that\nmistake. I had written the warning and then ignored it.\n\nCodex is the structuralist. It went looking for my experiments folder before\nreading anything, and attacked the shape of my argument rather than its\narithmetic. Its finding was that my headline metric multiplied five rates\nmeasured over four different populations. The arithmetic was correct. The number\nmeant nothing.\n\nThen both of them opened with the same two objections. They run in parallel,\nmemoryless, unable to coordinate. That agreement carried more weight than either\nreview alone, and it convinced me to rebuild the document rather than patch it.\n\nThe two days I spent trying to make one of them fair\n\nKimi has a habit that took me a while to understand. It never stops. Every round\nproduces fresh criticism, all of it individually defensible, and I could keep\nrevising forever without ever arriving at \"this is finished.\"\n\nFor a while I read that as temperament, so I tried to fix it the way everyone\ntries to fix it. I rewrote the instructions.\n\nI ran this properly, over three days in July, with a sealed holdout set and a\npre-registered decision rule. The question was narrow: can any wording make this\nmodel a useful pass-or-fail gate on a specification? I gave it more context, then\nless. I told it to be harsher. I told it to be gentler. I moved the stated\nfailure rate up and down, and the stated cost of missing something.\n\nThe answer was no, and the shape of the no is the part worth having.\n\nIt flagged 82 percent of specifications when 35 percent of them were actually\nbad. A rubber stamp that read nothing and approved everything scored better than\nevery prompt I wrote. On obviously good specs and obviously terrible ones it was\nperfect. On real ones it was a coin flip.\n\nEvery tone lever moved the flag rate and none of them improved the accuracy.\nTilting it toward flagging produced nine false alarms and zero real catches. Its\nsense of what looks risky turns out to be uncorrelated with what is actually\nbroken. This is the finding I keep coming back to, because \"just tell it to be\nmore critical\" is the first thing anyone reaches for and it is worse than\nuseless. It produces more noise that feels like more rigour.\n\nMore instruction made it monotonically worse. Every added distinction raised its\nflagging without adding a single new catch. One rewrite collapsed it into\napproving everything.\n\nMy best configuration scored 44 out of 50 on the data I tuned it against, then\ncaught zero of three real failures on the sealed holdout. It had memorised the\nphrasing of the examples I let it see rather than learning anything.\n\nI filed the whole thing as a failed experiment and moved on.\n\nIt was not a failed experiment\n\nThree days later I was writing up the review process and realised the null result\nwas the load-bearing part.\n\nThe model that loses to a rubber stamp on pass-or-fail is the same model that\nre-ran my script and caught a real error in my published numbers. Both of those\nare true at once, and I had been treating them as one purchase.\n\nFinding things and judging things are separate skills, and this reviewer has one\nof them.\n\nSo the process I ended up with never asks a model for a verdict. It asks for\nfindings, and every finding has to cite a line, a number, or a specific\ninference. Anything that cannot point at something is advisory by default.\nFindings get sorted into fatal, material, and advisory, and only fatal blocks\nacceptance.\n\nReview stops when a round produces nothing fatal, with a hard cap of three\nrounds. And the rule that actually made it terminate: later rounds may only check\nwhether earlier findings were resolved. They may not open new ground. New ground\nbecomes a separate task.\n\nWithout that last rule, every round legitimately discovers something new, because\nany document is infinitely criticisable, and the sequence never ends. With it,\nthe loop is bounded by the first round's findings, which is a finite list. The\nreviewer stopped being the thing that decides when I am done, which was the real\nproblem all along. Before, that decision was made by whatever hour I ran out of\npatience.\n\nA postscript about losing my own work\n\nWhile writing this I could not find the three-day experiment I just described. It\nwas on my own laptop, committed to git, in a folder two directories from where I\nwas working, finished the previous week.\n\nI searched for \"prompt engineering.\" I searched for \"tone\" across 3,483\nconversation transcripts. I ran a full content search across every project folder\nfor \"harsh,\" \"be kind,\" and half a dozen similar phrases. All of it came back\nempty, or came back with results about email etiquette.\n\nThe document that answered the question was sitting right there. It just never\nuses those words. It says propensity levers, base rate, cost asymmetry, flag\nrate. I had named the work for what it measured, and I went looking for it using\nthe words I would have described it with months later. Both descriptions are\ncorrect. They share no vocabulary.\n\nWhat eventually found it was listing my folders by date and reading the names.\n\nNothing was lost, corrupted, or missing. Storage was perfect. Retrieval failed\ncompletely, on the gap between how I filed something and how I later asked for\nit. That is a more honest argument for better search than any benchmark I could\nhave designed, and I got it by accident, from failing at it.\n\nTwo caveats, because they matter\n\nThe prompt was identical for both models. The surrounding software was not: each\nruns through its own command line tool with its own defaults. The comparison is\ncontrolled on instructions and imperfectly controlled on environment, and a\ncleaner version of this would hold both fixed.\n\nThe calibration result is about one model at one task, gating specifications. It\nis not a claim about that model generally, and it is certainly not a claim about\nthe others. What generalises is the method: measure your reviewer against a\nbaseline that does nothing before you trust its verdicts, because a reviewer that\nflags most things can look rigorous while carrying no information at all."
+    },
+    {
+      "slug": "2026-07-26-hello-world",
+      "title": "Hello World",
+      "date": "July 26, 2026",
+      "date_iso": "2026-07-26",
+      "url": "https://drakegriffith.github.io/drakes-website/blog/2026-07-26-hello-world.html",
+      "path": "blog/2026-07-26-hello-world.html",
+      "words": 31,
+      "excerpt": "This is the first post. The point of having your own website is being able to post whatever you want on it without asking anyone. So here it is. More soon.",
+      "text": "This is the first post. The point of having your own website is being able to\npost whatever you want on it without asking anyone. So here it is.\n\nMore soon."
+    }
+  ]
+}

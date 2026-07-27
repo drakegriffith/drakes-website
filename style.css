@@ -1,25 +1,214 @@
-/* style.css - do not overthink this */
+/* style.css - 2010, but the good parts. Times New Roman, black on white,
+   one accent color, buttons that look pressable. Still one file. */
+
+:root {
+  --ink:    #111111;
+  --muted:  #6f6f6f;
+  --rule:   #d5d5d5;
+  --hair:   #e6e6e6;
+  --accent: #c8501e;
+  --link:   #0b3d91;
+}
+
+html { background-color: #ffffff; }
 
 body {
   font-family: "Times New Roman", Times, serif;
-  font-size: 16px;
-  background-color: #FFFFFF;
-  color: #000000;
-  margin: 20px;
-  max-width: 700px;
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--ink);
+  background-color: #ffffff;
+  margin: 0 auto;
+  padding: 0 22px 60px 22px;
+  max-width: 760px;
 }
 
-a { color: #0000EE; }
-a:visited { color: #551A8B; }
+/* ---------- links ---------- */
 
-hr { border: 0; border-top: 1px solid #000000; }
+a         { color: var(--link); }
+a:visited { color: #5a3d84; }
+a:hover   { color: var(--accent); }
 
-.nav { margin-bottom: 6px; }
+/* ---------- top bar ---------- */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 0 12px 0;
+  border-bottom: 2px solid #000000;
+  margin-bottom: 16px;
+}
+
+.brand {
+  font-size: 30px;
+  font-weight: bold;
+  letter-spacing: -0.5px;
+  color: #000000;
+  text-decoration: none;
+}
+.brand:visited { color: #000000; }
+.brand:hover   { color: #000000; text-decoration: none; }
+
+.pill {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  padding: 1px 9px 2px 9px;
+  white-space: nowrap;
+}
+.pill:before { content: "\25CF"; font-size: 8px; vertical-align: 2px; margin-right: 5px; }
+
+.spacer { flex: 1; }
+
+/* ---------- 2010 buttons ---------- */
+
+.btn,
+.nav a {
+  display: inline-block;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 14px;
+  line-height: 1.1;
+  text-decoration: none;
+  color: #111111;
+  padding: 6px 12px;
+  border: 1px solid #9a9a9a;
+  border-radius: 3px;
+  background-image: linear-gradient(#fdfdfd, #e4e4e4);
+  background-color: #f0f0f0;
+  box-shadow: inset 0 1px 0 #ffffff, 0 1px 1px rgba(0, 0, 0, 0.12);
+}
+.btn:visited, .nav a:visited { color: #111111; }
+.btn:hover, .nav a:hover {
+  color: #000000;
+  border-color: #555555;
+  background-image: linear-gradient(#ffffff, #ededed);
+}
+.btn:active, .nav a:active {
+  background-image: linear-gradient(#e0e0e0, #f2f2f2);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.nav {
+  margin: 0 0 18px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.nav a.here {
+  font-weight: bold;
+  border-color: #333333;
+  background-image: linear-gradient(#efefef, #dcdcdc);
+}
+
+/* ---------- headings ---------- */
+
+h1 {
+  font-size: 27px;
+  font-weight: bold;
+  letter-spacing: -0.3px;
+  margin: 18px 0 4px 0;
+  line-height: 1.2;
+}
+
+h2 {
+  font-size: 19px;
+  margin: 32px 0 12px 0;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #000000;
+}
+
+h3 { font-size: 17px; margin: 24px 0 6px 0; }
+
+.tagline { color: var(--muted); font-style: italic; margin: 0 0 6px 0; }
+
+/* ---------- body copy ---------- */
+
+p  { margin: 0 0 14px 0; }
+ul, ol { margin: 0 0 14px 0; padding-left: 22px; }
+li { margin: 3px 0; }
+
+hr { border: 0; border-top: 1px solid var(--rule); margin: 26px 0; }
+
+blockquote {
+  margin: 18px 0;
+  padding: 2px 0 2px 16px;
+  border-left: 3px solid var(--accent);
+  color: #333333;
+}
+
+code, pre {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 14px;
+  background-color: #f6f6f6;
+  border: 1px solid var(--hair);
+}
+code { padding: 1px 4px; }
+pre  { padding: 10px 12px; overflow-x: auto; }
+
+.date { color: var(--muted); font-size: 13px; }
+
+/* ---------- tables in posts ---------- */
+
+table { border-collapse: collapse; margin: 0 0 18px 0; }
+table[border] th, table[border] td {
+  border: 1px solid #c9c9c9;
+  padding: 5px 10px;
+  text-align: left;
+}
+table[border] th { background-color: #f4f4f4; }
+
+/* a boxed aside */
+.note {
+  border: 1px solid #e2d5cd;
+  border-left: 3px solid var(--accent);
+  background-color: #fffaf7;
+  padding: 10px 14px;
+  margin: 18px 0;
+}
+
+/* ---------- post lists ---------- */
+
+.posts ul { list-style: none; margin: 0; padding: 0; }
+.posts li {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin: 0;
+  padding: 9px 2px;
+  border-bottom: 1px solid var(--hair);
+}
+.posts li a { text-decoration: none; }
+.posts li a:hover { text-decoration: underline; }
+.posts .date { margin-left: auto; white-space: nowrap; }
+
+/* ---------- pictures ---------- */
+
+img { max-width: 100%; height: auto; }
+.pics td { padding: 0 14px 14px 0; vertical-align: top; }
+.pics img { border: 1px solid #000000; display: block; margin-bottom: 5px; }
+
+/* ---------- footer ---------- */
 
 .footer {
-  margin-top: 30px;
-  font-size: 12px;
-  color: #666666;
+  margin-top: 40px;
+  padding-top: 10px;
+  border-top: 1px solid var(--rule);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--muted);
 }
 
-.date { color: #666666; font-size: 13px; }
+/* ---------- small screens ---------- */
+
+@media (max-width: 640px) {
+  body { font-size: 16px; }
+  .brand { font-size: 24px; }
+  .pics, .pics tbody, .pics tr, .pics td { display: block; width: 100%; }
+  .pics td { padding-right: 0; }
+  .posts li { flex-wrap: wrap; gap: 4px; }
+  .posts .date { margin-left: 0; width: 100%; }
+}

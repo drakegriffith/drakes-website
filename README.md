@@ -2,7 +2,7 @@
 
 Drake Griffith's personal website. Plain HTML, one CSS file, Times New Roman, no
 build step, no framework, no blog platform. Looks like it was made in 2010 because
-that is the point.
+that is the point. Also speaks Model Context Protocol, because that is also the point.
 
 Live at: https://drakegriffith.github.io/drakes-website/
 
@@ -11,14 +11,23 @@ Live at: https://drakegriffith.github.io/drakes-website/
 ```
 index.html        home page + latest posts
 blog.html         full post list
-about.html        one paragraph + one photo
-links.html        email / github
+about.html        one paragraph + photos
+pledge.html       the No-AI blog hub pledge (manifesto; hub not built yet)
+mcp.html          how agents should read this site
+links.html        email / github / machine endpoints
 style.css         the entire design system
 _template.html    blueprint for a new post
-new-post.sh       makes a post and wires it into both index pages
+new-post.sh       makes a post, wires it into both index pages, rebuilds the feed
+build-feed.py     regenerates feed.json + llms.txt from blog/*.html
+feed.json         GENERATED - every post, full text, one request
+llms.txt          GENERATED - the map, plain text
+mcp/server.js     MCP server (zero deps, stdio) exposing the site to agents
 blog/             one .html file per post
-images/           put me.jpg here
+images/           photos
+HUB.md            design notes for the pledge hub (detector + RAG search)
 ```
+
+`feed.json` and `llms.txt` are generated. Edit `build-feed.py`, not them.
 
 ## Posting
 
@@ -30,8 +39,22 @@ images/           put me.jpg here
 ```
 
 The script creates `blog/YYYY-MM-DD-slug.html`, prepends the link to `blog.html`
-and to the top-5 list on `index.html`, and updates the "Last updated" line. It is
-pure bash + python3 — nothing in the publishing path calls a model.
+and to the top-5 list on `index.html`, updates the "Last updated" line, and reruns
+`build-feed.py`. Pure bash + python3 — nothing in the publishing path calls a model.
+
+## MCP
+
+```bash
+claude mcp add drakes-website -- node ./mcp/server.js
+```
+
+Tools: `list_posts`, `get_post`, `search_posts`, `get_pledge`. Details in
+[`mcp/README.md`](mcp/README.md). Smoke test:
+
+```bash
+printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' \
+              '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' | node mcp/server.js
+```
 
 ## Notes for Claude
 
@@ -42,8 +65,13 @@ When Drake says "post this to my blog":
 2. `./new-post.sh "The Title" draft.txt --publish`
 3. Delete the scratch file. Give Drake the live URL.
 
-Do not add a static site generator, a package.json, Tailwind, or dark mode. The
-ugliness is load-bearing.
+House style: dry, short declaratives, a joke that lands by being true. Never the
+"it's not just X, it's Y" construction — that one is named and shamed on
+`pledge.html`, so using it here would be embarrassing.
+
+Do not add a static site generator, a package.json at the root, Tailwind, or dark
+mode. The ugliness is load-bearing. `mcp/package.json` exists only so the server
+can be installed as a bin; it has no dependencies and never will.
 
 ## Local preview
 
