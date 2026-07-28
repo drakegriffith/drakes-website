@@ -30,125 +30,123 @@
 <hr>
 
 <p>
-For about a week I built a controlled experiment. The question was one I had been
-avoiding for months: does my upgraded Claude Code setup beat a bare one? The setup
-is a pile of accumulated machinery. A knowledge vault, a set of skills, a router
-file that tells the agent which skill to reach for, a context-management layer, and
-a cross-project memory system that carries what I learned in one repo into the next.
-Every piece of it feels useful. None of it had ever been measured.
+I spent about a week building a controlled experiment to find out whether my own
+setup is worth anything, and then I killed it. The setup is the pile of stuff I have
+bolted onto Claude Code over the last few months. A vault of notes, a stack of
+skills, a router file that tells the agent which skill to grab, a context layer, and
+a memory system that carries what I learned in one repo into every other repo. It
+all feels useful. Feels. Nobody had measured it, me least of all.
 </p>
 
 <p>
-The design was an ablation study. Run the same tasks under the full stack, then run
-them again with one piece removed at a time, and see which removals hurt. 167
-repetitions per cell. 8,183 runs planned. Pre-registered and frozen before a single
-run, so I could not quietly move the goalposts once numbers started arriving.
+So: ablation study. Same tasks under the full stack, then again with one piece
+pulled out at a time, and whatever hurts when you pull it is the piece doing work.
+167 reps per cell. 8,183 runs. Pre-registered and frozen before a single run so I
+could not drift the goalposts once numbers started landing, which I would have.
 </p>
 
 <p>
-I killed it before it produced one scored run. The gate that killed it worked
-exactly as designed, and what it caught is the part worth writing down.
+Zero of those runs happened.
 </p>
 
-<h2>The gate</h2>
+<h2>The gate that ate it</h2>
 
 <p>
-Before a task's first scored run, an automated check greps every memory store on
-this machine for that task's distinctive strings. If a task's content is already
-sitting somewhere an agent can retrieve, the measurement is worthless. The
-full-stack arm looks brilliant because it looked up an answer it was supposed to
-derive. Any hit burns the task. Fail-closed, no operator override, because the only
-person who would ever want an override is me at 1am wanting the number.
-</p>
-
-<p>
-All seven main tasks burned. Zero scored runs were ever spent.
+Before a task's first scored run there is a check that greps every memory store on
+the machine for that task's distinctive strings. If the answer is already sitting
+somewhere an agent can retrieve, I am not measuring reasoning, I am measuring
+lookup. Any hit burns the task. Fail-closed, no override switch, because the only
+person who would ever reach for the override is me at 1am wanting the number.
 </p>
 
 <p>
-The first cause was mine and it was stupid in a boring way. I had sub-agents author
-the tasks on this machine, so every task hit its own authoring transcript. Session
-transcripts are retrievable memory. I know that. I had written it down myself, in
-the same repo, a week earlier. That one was fixable and I fixed it. New authoring
-path, re-scan, four of seven came back clean.
+All seven tasks burned. Nothing scored, ever.
 </p>
 
 <p>
-The second cause is the one that ended the study.
-</p>
-
-<h2>Where the content came from</h2>
-
-<p>
-My cross-project memory system had consolidated pieces of this experiment into
-memory records belonging to two completely unrelated projects. Spec revisions, task
-file paths, and in one case the literal edit that introduced a task's answer string,
-filed under a project that has nothing to do with any of this.
+The first cause is embarrassing and boring. I had sub-agents write the tasks on this
+machine, so every task matched its own authoring transcript. Transcripts are memory.
+I knew that. I had written it down in the same repo a week earlier, in a file about
+this exact hazard. Moved the authoring off the machine, re-scanned, four of seven
+came back clean.
 </p>
 
 <p>
-Nothing ever read the experiment's repo. There was no traversal to block and no path
-to add to an ignore list. The content arrived pre-formed, through the memory layer,
-summarized and filed while I worked. The memory system was doing its job. Its job is
-to notice what I am working on and make it available later, everywhere.
+Then the second cause.
+</p>
+
+<h2>The memory system had already filed it</h2>
+
+<p>
+My cross-project memory had consolidated pieces of the experiment into records
+belonging to two unrelated projects. Spec revisions, task file paths, and in one case
+the literal edit that introduced a task's answer string, sitting in a record filed
+under a project that has nothing to do with any of this.
 </p>
 
 <p>
-For most work that is the feature I built it for. For this experiment it is fatal,
-and fatal in a specific way. Two of the conditions under test <em>are</em> memory and
-vault access. The leak is not symmetric across arms. The full-stack arm can retrieve
-a leaked answer the stripped-down arm cannot reach, so part of any gap I measured
-would have been retrieval of my own experiment, and I would have read it as evidence
-that the harness earns its keep. That is the exact claim I set out to test. An
-experiment tilted toward its own hypothesis has no finding to report.
+Nothing read the experiment's repo. There was no crawl to block, no directory to add
+to an ignore list, no leak in the sense of something escaping through a hole. The
+content showed up pre-formed, already summarized, filed while I worked. The memory
+system was doing the job I built it for. The job is to notice what I am doing and
+make it available later, in every other project. It did that. It is good at it.
 </p>
 
 <p>
-This is not a quirk of my particular setup. If you run agent memory that consolidates
-across projects, and you also want to evaluate those agents on anything, you have this
-problem waiting for you. Your evaluation material is material. It gets consolidated.
-The isolation you think you have is repo-shaped, and memory ignores repo boundaries,
-because ignoring repo boundaries is the whole product.
-</p>
-
-<h2>The finding I liked less</h2>
-
-<p>
-Writing up the kill, I reread my own pre-registration and found something worse than
-the leak.
+And two of the conditions under test are memory and vault access. That is what kills
+it. The leak is not even across arms. The full-stack arm can retrieve the leaked
+answer, the stripped-down arm cannot reach it, so some slice of whatever gap I
+measured is my own experiment handed back to me, and I would have read that slice as
+the harness earning its keep. Which is the claim. That is the whole thing I sat down
+to test.
 </p>
 
 <p>
-The design rested on three tasks, one per task shape. 8,183 runs across three tasks.
-All that repetition buys precision, and precision is not generality. I would have
-finished with a very tight measurement of three specific tasks and no license to say
-anything about a fourth. That limitation is written into the pre-registration in my
-own words. I read it during review. I approved it anyway, because the run count
-looked serious and I wanted to start.
+If you run agent memory across projects and you also want to evaluate those agents on
+anything, this is sitting there waiting for you. Your eval material is material. It
+gets consolidated like everything else. The isolation you think you have is
+repo-shaped, memory ignores repo shape, that is the product.
+</p>
+
+<h2>The bit I liked less</h2>
+
+<p>
+Writing up the kill I reread my own pre-registration and found something worse than
+the leak, which is a sentence I did not enjoy typing.
 </p>
 
 <p>
-So the clean version of this experiment was going to produce a number I could not
-use. The contamination scan spared me from finding that out in six weeks.
+Three tasks. One per task shape. 8,183 runs across three tasks. All that repetition
+buys precision and precision is not generality, so I would have finished with a very
+tight measurement of three specific tasks and no standing to say a word about a
+fourth. The limitation is written into the pre-registration. In my own words. I read
+it during review and approved it, because the run count looked serious and I wanted
+to start.
+</p>
+
+<p>
+So the clean version of this experiment was going to hand me a number I could not
+use. I got saved from that by a grep.
 </p>
 
 <h2>What I am doing instead</h2>
 
 <p>
-A bake-off on real tickets from live repos. Full stack against bare, same ticket,
-judged blind. Contamination stops mattering when the tasks are work I wanted done
-anyway. It is a looser instrument and it measures something I care about.
+Bake-off on real tickets out of live repos. Full stack against bare, same ticket,
+judged blind. Contamination stops mattering once the tasks are work I wanted done
+anyway, and if the harness wins partly by retrieving something it stashed earlier,
+fine, that is the harness doing its job. Looser instrument. Worse paper. Measures a
+thing I care about.
 </p>
 
 <p>
-The mistake underneath all of this was sequencing. I spent the week building the
-measuring apparatus: pre-registration, frozen spec, an adversarial review panel,
-contamination scanning, isolation proofs. That work was competent. I built all of it
-before checking whether the thing I wanted to measure was measurable on this machine,
-with this memory system, on tasks of this kind. That check takes an afternoon. It goes
-first.
+The actual mistake was sequencing. I built the apparatus first, all of it,
+pre-registration and frozen spec and an adversarial review panel and contamination
+scanning and isolation proofs, and the apparatus is good. I built it before checking
+whether the thing I wanted to measure was measurable on this machine, with this
+memory running, on tasks of this kind. That check is an afternoon. It goes first, and
+I knew that, and I did it in the other order anyway.
 </p>
-
 
 <hr>
 <p><a class="btn" href="../blog.html">&laquo; Back to blog</a></p>
