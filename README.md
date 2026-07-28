@@ -28,7 +28,7 @@ sign/server.js    pledge registry: SQLite, zero deps, also serves the site local
 tickets/          paste-ready prompts for the hub build and the registry deploy
 blog/             one .html file per post
 images/           photos
-HUB.md            design notes for the pledge hub (detector + RAG search)
+HUB.md            SUPERSEDED scoping sketch; pledge.html is the commitment
 ```
 
 `feed.json` and `llms.txt` are generated. Edit `build-feed.py`, not them.

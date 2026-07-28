@@ -89,8 +89,9 @@ const PLEDGE = [
   "4. If I quote a machine, I say so and I put it in quotes.",
   "5. If I break this, I take the post down myself before anyone has to ask.",
   "",
-  "Enforcement: every submission runs through a slop detector before it goes live.",
-  "It is not magic and it will be wrong sometimes. It flags, a human decides.",
+  "Enforcement: I read every submission myself. There is no detector.",
+  "My accuracy at that is measured on a blind labelled set and published.",
+  "Rejections are private, come with a reason, and can be argued with.",
   "Full text: https://drakegriffith.github.io/drakes-website/pledge.html",
 ].join("\n");
 
