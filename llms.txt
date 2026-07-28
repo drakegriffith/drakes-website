@@ -15,6 +15,7 @@
 
 ## Posts
 
+- [I killed a week-long experiment because the thing I was testing had already read the answers](https://drakegriffith.github.io/drakes-website/blog/2026-07-28-i-killed-a-week-long-experiment-because-the-thing-i-was-testing-had-already-read-the-answers.html): July 28, 2026, 865 words. For about a week I built a controlled experiment. The question was one I had been avoiding for months: does my upgraded Claude Code setup beat a bare one? The s
 - [I asked two AI models to destroy my work. They disagreed about how.](https://drakegriffith.github.io/drakes-website/blog/2026-07-26-two-ai-reviewers.html): July 26, 2026, 1301 words. For the last few weeks I have been designing a piece of software, and before any decision gets locked I hand the write-up to two AI models and ask them to break
 - [Hello World](https://drakegriffith.github.io/drakes-website/blog/2026-07-26-hello-world.html): July 26, 2026, 31 words. This is the first post. The point of having your own website is being able to post whatever you want on it without asking anyone. So here it is. More soon.
 - [Building this right now with Wayfinder](https://drakegriffith.github.io/drakes-website/blog/2026-07-26-building-this-right-now-with-wayfinder.html): July 26, 2026, 39 words. Building this right now with Wayfinder. Shout out Matt Pocock. I know a two-line status update is not a blog post. It is my website. I can do what I want, which

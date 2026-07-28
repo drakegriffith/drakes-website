@@ -1,0 +1,33 @@
+I have a thing that codes while I sleep. It grabs issues off GitHub, hands each one to an AI agent in a little sandbox, and in the morning I find out whether it did anything useful. It runs on Sandcastle, which Matt Pocock made.
+
+It has done this 69 times. Every single time, it did the issues one at a time. Eight issues, in a line, like people waiting for a bathroom.
+
+I was talking about this with Michael, whose last name I am not going to attempt because it is roughly the length of a CVS receipt, and one of us went: wait. Why is it a line? Why don't we just run all eight at once?
+
+We were very pleased with ourselves. Fire. Wheel. Parallel agents.
+
+Then I opened the Sandcastle README.
+
+Line 17: "Great for parallelizing multiple AFK agents."
+
+There are also two starter templates you get offered when you first install the thing. They are called `parallel-planner` and `parallel-planner-with-review`. One of them is literally described as planning parallelizable issues and running them on separate branches.
+
+So the feature was in the box. It was in the box on day one. It was a checkbox in the installer and I clicked past it, and then 69 nights later I invented it again with a friend.
+
+Cool. Great. Love that for me.
+
+Here is the part that made me feel slightly less like a raccoon, though.
+
+We did not end up in a line by accident. The code I wrote on top of Sandcastle glues each agent's work onto the last one's, in order, on purpose. And the thing that grades the work in the morning uses that order. When the tests go red, it walks back through the line and figures out which issue broke it.
+
+Take the line away and that question stops having an answer. Eight agents all starting from the same place gives you eight branches and no idea who did it.
+
+So the line was buying me something. Nobody wrote that down anywhere, so for 69 nights it just looked like a dumb default.
+
+There is also a bonus reason to go parallel that I did not see coming. When the agents go one at a time, each one starts from the mess the previous one made. Which means agent number one can quietly change the rules for agents two through eight, and nothing checks in between. If they all start from the same frozen copy instead, they cannot touch each other at all. Faster and safer, which is not a trade you get offered often.
+
+We are going to look at building it. I have to redo the who-broke-it part first, because that answer only works while the line exists, and the whole idea is to delete the line.
+
+Anyway. Read the README. I am told this is a known technique.
+
+Credit to Michael for saying it out loud, and to Claude, who read the documentation, found the templates, and had to tell me that the blog post I was about to write was a checkbox in the installer.

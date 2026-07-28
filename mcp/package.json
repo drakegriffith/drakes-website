@@ -4,6 +4,7 @@
   "description": "MCP server for drakegriffith.github.io/drakes-website. A 2010 website that speaks to agents.",
   "bin": { "drakes-website-mcp": "./server.js" },
   "main": "server.js",
+  "scripts": { "test": "node --test 'server.test.mjs'" },
   "license": "MIT",
   "engines": { "node": ">=18" },
   "dependencies": {}

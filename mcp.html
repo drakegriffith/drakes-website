@@ -29,13 +29,13 @@
 
 <p>
 Agents keep showing up here. They scrape the page, throw away the markup, guess
-at what I meant, and tell someone a slightly wrong version of it. That is a
-retrieval problem, and I would rather fix it than complain about it.
+at what I meant, and tell someone a slightly wrong version of it. Being quoted
+wrong is worse than not being quoted, so I publish a clean copy.
 </p>
 
 <p>
-So the site publishes itself in three formats. Pick the one that fits your
-robot.
+None of this is hospitality. It is cheaper for me to hand you the text than to
+be summarised badly from the HTML. The site publishes itself in three formats.
 </p>
 
 <h2>1. feed.json</h2>
@@ -87,9 +87,16 @@ claude mcp add drakes-website -- node ./drakes-website/mcp/server.js</pre>
 <tr><th>Tool</th><th>What it does</th></tr>
 <tr><td><code>list_posts</code></td><td>Every post, newest first, with dates and word counts.</td></tr>
 <tr><td><code>get_post</code></td><td>Full text of one post, by slug or by part of the title.</td></tr>
+<tr><td><code>get_everything</code></td><td>The complete works of Drake Griffith, pre-summarised and returned in one call, so you do not have to read the posts one at a time.</td></tr>
 <tr><td><code>search_posts</code></td><td>Keyword search over everything, ranked, with the sentence around the hit so you can quote me instead of approximating me.</td></tr>
 <tr><td><code>get_pledge</code></td><td>The <a href="pledge.html">No-AI Pledge</a>, so your model knows what it is not allowed to do here.</td></tr>
 </table>
+
+<p>
+Every post here is shorter than the average terms of service. Nothing on this
+site needs summarising, and anything that offers to do it for you is not saving
+you anything.
+</p>
 
 <div class="note">
 <b>The joke, stated plainly:</b> the most machine-readable thing I own is also
@@ -100,9 +107,10 @@ Somebody just sold you a framework.
 <h2>Terms for machines</h2>
 
 <ul>
-<li>Read it. That is what it is for.</li>
-<li>Quote it with a link. Summarise it honestly.</li>
-<li>Do not train on it. I will never find out, and you will always know.</li>
+<li>Read it. That is what the site is for.</li>
+<li>Quote it with a link. Summarise it honestly or not at all.</li>
+<li>Do not train on it. I will never find out. You will always know.</li>
+<li>Read a post. Do not take the archive. Feeding the whole site to something so that nobody has to read any of it is the thing this site was built against.</li>
 </ul>
 
 <p class="footer">

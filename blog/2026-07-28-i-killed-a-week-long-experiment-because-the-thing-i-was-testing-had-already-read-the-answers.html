@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>I killed a week-long experiment because the thing I was testing had already read the answers - Drake Griffith</title>
+<link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+<div class="topbar">
+<a class="brand" href="../index.html">Drake Griffith</a>
+<span class="pill">Live</span>
+<span class="spacer"></span>
+<a class="btn" href="mailto:christopherg@actualintelligencelabs.ai">Email Me</a>
+</div>
+
+<p class="nav">
+<a href="../index.html">Home</a>
+<a class="here" href="../blog.html">Blog</a>
+<a href="../about.html">About Me</a>
+<a href="../pledge.html">The Pledge</a>
+<a href="../mcp.html">MCP</a>
+<a href="../links.html">Links</a>
+</p>
+
+<h1>I killed a week-long experiment because the thing I was testing had already read the answers</h1>
+<p class="date">July 28, 2026</p>
+
+<hr>
+
+<p>
+For about a week I built a controlled experiment. The question was one I had been
+avoiding for months: does my upgraded Claude Code setup beat a bare one? The setup
+is a pile of accumulated machinery. A knowledge vault, a set of skills, a router
+file that tells the agent which skill to reach for, a context-management layer, and
+a cross-project memory system that carries what I learned in one repo into the next.
+Every piece of it feels useful. None of it had ever been measured.
+</p>
+
+<p>
+The design was an ablation study. Run the same tasks under the full stack, then run
+them again with one piece removed at a time, and see which removals hurt. 167
+repetitions per cell. 8,183 runs planned. Pre-registered and frozen before a single
+run, so I could not quietly move the goalposts once numbers started arriving.
+</p>
+
+<p>
+I killed it before it produced one scored run. The gate that killed it worked
+exactly as designed, and what it caught is the part worth writing down.
+</p>
+
+<h2>The gate</h2>
+
+<p>
+Before a task's first scored run, an automated check greps every memory store on
+this machine for that task's distinctive strings. If a task's content is already
+sitting somewhere an agent can retrieve, the measurement is worthless. The
+full-stack arm looks brilliant because it looked up an answer it was supposed to
+derive. Any hit burns the task. Fail-closed, no operator override, because the only
+person who would ever want an override is me at 1am wanting the number.
+</p>
+
+<p>
+All seven main tasks burned. Zero scored runs were ever spent.
+</p>
+
+<p>
+The first cause was mine and it was stupid in a boring way. I had sub-agents author
+the tasks on this machine, so every task hit its own authoring transcript. Session
+transcripts are retrievable memory. I know that. I had written it down myself, in
+the same repo, a week earlier. That one was fixable and I fixed it. New authoring
+path, re-scan, four of seven came back clean.
+</p>
+
+<p>
+The second cause is the one that ended the study.
+</p>
+
+<h2>Where the content came from</h2>
+
+<p>
+My cross-project memory system had consolidated pieces of this experiment into
+memory records belonging to two completely unrelated projects. Spec revisions, task
+file paths, and in one case the literal edit that introduced a task's answer string,
+filed under a project that has nothing to do with any of this.
+</p>
+
+<p>
+Nothing ever read the experiment's repo. There was no traversal to block and no path
+to add to an ignore list. The content arrived pre-formed, through the memory layer,
+summarized and filed while I worked. The memory system was doing its job. Its job is
+to notice what I am working on and make it available later, everywhere.
+</p>
+
+<p>
+For most work that is the feature I built it for. For this experiment it is fatal,
+and fatal in a specific way. Two of the conditions under test <em>are</em> memory and
+vault access. The leak is not symmetric across arms. The full-stack arm can retrieve
+a leaked answer the stripped-down arm cannot reach, so part of any gap I measured
+would have been retrieval of my own experiment, and I would have read it as evidence
+that the harness earns its keep. That is the exact claim I set out to test. An
+experiment tilted toward its own hypothesis has no finding to report.
+</p>
+
+<p>
+This is not a quirk of my particular setup. If you run agent memory that consolidates
+across projects, and you also want to evaluate those agents on anything, you have this
+problem waiting for you. Your evaluation material is material. It gets consolidated.
+The isolation you think you have is repo-shaped, and memory ignores repo boundaries,
+because ignoring repo boundaries is the whole product.
+</p>
+
+<h2>The finding I liked less</h2>
+
+<p>
+Writing up the kill, I reread my own pre-registration and found something worse than
+the leak.
+</p>
+
+<p>
+The design rested on three tasks, one per task shape. 8,183 runs across three tasks.
+All that repetition buys precision, and precision is not generality. I would have
+finished with a very tight measurement of three specific tasks and no license to say
+anything about a fourth. That limitation is written into the pre-registration in my
+own words. I read it during review. I approved it anyway, because the run count
+looked serious and I wanted to start.
+</p>
+
+<p>
+So the clean version of this experiment was going to produce a number I could not
+use. The contamination scan spared me from finding that out in six weeks.
+</p>
+
+<h2>What I am doing instead</h2>
+
+<p>
+A bake-off on real tickets from live repos. Full stack against bare, same ticket,
+judged blind. Contamination stops mattering when the tasks are work I wanted done
+anyway. It is a looser instrument and it measures something I care about.
+</p>
+
+<p>
+The mistake underneath all of this was sequencing. I spent the week building the
+measuring apparatus: pre-registration, frozen spec, an adversarial review panel,
+contamination scanning, isolation proofs. That work was competent. I built all of it
+before checking whether the thing I wanted to measure was measurable on this machine,
+with this memory system, on tasks of this kind. That check takes an afternoon. It goes
+first.
+</p>
+
+
+<hr>
+<p><a class="btn" href="../blog.html">&laquo; Back to blog</a></p>
+
+<p class="footer">
+&copy; 2026 Drake Griffith. All rights reserved.
+</p>
+
+</body>
+</html>
