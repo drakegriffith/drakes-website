@@ -6,7 +6,7 @@
   "human_written": true,
   "ai_written": false,
   "license": "Read it. Quote it with a link. Do not train a slop machine on it.",
-  "generated": "2026-07-28",
+  "generated": "2026-07-30",
   "mcp": "https://drakegriffith.github.io/drakes-website/mcp.html",
   "pages": [
     {
@@ -27,7 +27,7 @@
     },
     {
       "title": "Sign The Pledge",
-      "url": "https://drakegriffith.github.io/drakes-website/sign.html"
+      "url": "https://the-hub-submission.actualintelligence.workers.dev/pledge"
     },
     {
       "title": "MCP",

@@ -13,7 +13,7 @@ index.html        home page + latest posts
 blog.html         full post list
 about.html        one paragraph + photos
 pledge.html       the No-AI blog hub pledge (manifesto; hub not built yet)
-sign.html         signature form + status lookup + signatory list
+sign.html         signpost only - signing moved to the hub's own /pledge page
 banned.html       the red ban notice (reads the reason from the registry)
 mcp.html          how agents should read this site
 links.html        email / github / machine endpoints

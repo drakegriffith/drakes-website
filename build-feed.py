@@ -13,6 +13,10 @@ import datetime
 
 ROOT = pathlib.Path(__file__).resolve().parent
 SITE = "https://drakegriffith.github.io/drakes-website"
+# Signing lives on the hub, not on this site. sign.html is a signpost now, so
+# the machine-readable index points at the page that actually records a
+# signature rather than at the one that used to pretend to.
+HUB_PLEDGE = "https://the-hub-submission.actualintelligence.workers.dev/pledge"
 
 TAGS = re.compile(r"<[^>]+>")
 WS = re.compile(r"\s+")
@@ -70,7 +74,7 @@ def main() -> None:
             {"title": "Blog", "url": f"{SITE}/blog.html"},
             {"title": "About Me", "url": f"{SITE}/about.html"},
             {"title": "The Pledge", "url": f"{SITE}/pledge.html"},
-            {"title": "Sign The Pledge", "url": f"{SITE}/sign.html"},
+            {"title": "Sign The Pledge", "url": HUB_PLEDGE},
             {"title": "MCP", "url": f"{SITE}/mcp.html"},
             {"title": "Links", "url": f"{SITE}/links.html"},
         ],
