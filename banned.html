@@ -28,8 +28,9 @@
 <p class="banner-sub">A machine wrote it. You signed something that said it would not.</p>
 
 <div class="ban-box">
-<p id="detail"><b>Reason:</b> Broke the pledge.</p>
-<p id="who" class="date"></p>
+<p><b>The reason is in the email.</b> I wrote it by hand and sent it to the
+address you signed with. It is the same wording that goes on the public record,
+so there is no gentler version of it that you did not see.</p>
 </div>
 
 <h2>What happened</h2>
@@ -45,7 +46,9 @@ this call gets made here.
 
 <ul>
 <li>Your posts stay down.</li>
-<li>The ban is public. It shows up next to your name on the <a href="sign.html">signatory list</a>, permanently.</li>
+<li>The ban is public. Your display name, your signature number, the date and my
+reason go on the hub's bans page, permanently. Four things, and nothing else —
+not your email, not a word of what you sent me.</li>
 <li>You can still read everything. Nobody gets locked out of reading.</li>
 </ul>
 
@@ -64,37 +67,6 @@ you have. A person will read it and a person will decide, same as before.
 &copy; 2026 Drake Griffith. All rights reserved.<br>
 This page is red on purpose. It is the only red on the entire website.
 </p>
-
-<script>
-// Pull the real reason out of the registry when there is one; otherwise this
-// page still reads fine, which is the point of writing the default in the HTML.
-(function () {
-  var email = new URLSearchParams(location.search).get("email");
-  if (!email) return;
-
-  var local = location.hostname === "localhost" || location.hostname === "127.0.0.1";
-  var API = local ? "" : "https://pledge-registry.invalid";
-
-  function esc(s) {
-    return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
-      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
-    });
-  }
-
-  fetch(API + "/api/status?email=" + encodeURIComponent(email))
-    .then(function (r) { return r.json(); })
-    .then(function (d) {
-      if (!d.ok || d.status !== "banned") return;
-      var s = d.signature;
-      document.getElementById("detail").innerHTML = "<b>Reason:</b> " + esc(s.ban_reason);
-      var when = s.banned_at ? new Date(s.banned_at) : null;
-      document.getElementById("who").textContent =
-        "Signatory #" + s.number + ", " + s.name + ". Banned " +
-        (when && !isNaN(when) ? when.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : s.banned_at) + ".";
-    })
-    .catch(function () {});
-})();
-</script>
 
 </body>
 </html>
