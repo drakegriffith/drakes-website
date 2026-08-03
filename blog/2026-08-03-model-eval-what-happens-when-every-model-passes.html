@@ -107,6 +107,10 @@ adherence) without seeing each other's verdict.
 <h2>Finding 1: pass/fail stopped being the interesting number</h2>
 
 <p>
+<img src="../images/model-eval-pass-rate-ceiling.png" alt="Pass rate with 95% Wilson intervals for all 25 model by effort by harness cells in the corpus, 267 of 267 runs passing. Every dot sits at 100%; the whiskers run back to each cell's Wilson lower bound and range from 34% for the 2 of 2 hybrid cell to 89% for Sol at low with 32 of 32." width="900">
+</p>
+
+<p>
 Across the 267 scorable runs in the current corpus, every model passed every task it
 attempted. 100%. Sol, Fable, Kimi K3, GPT-5.6 Luna, GPT-5.3 Codex Spark, both Claude
 Haiku 4.5 snapshots, all of it. (There are 268 rows on disk. One is excluded as a
@@ -222,6 +226,10 @@ close that gap is a run I haven't done.
 <h2>Finding 3: the effort knob never flipped a single outcome</h2>
 
 <p>
+<img src="../images/model-eval-effort-ladder.png" alt="Median output tokens per solved run for every bare model, one row per model and one dot per effort rung on a shared 0 to 6,000 token axis. Sol spans 4.40 times from low to ultra and GPT-5.6 Luna 3.38 times; both Claude Haiku 4.5 rows step backwards, spending less at a higher tier." width="900">
+</p>
+
+<p>
 Every model in this corpus exposes an "effort" knob (low/medium/high, or similar),
 and the working assumption going in was that higher effort should mean better
 outcomes. This is the one claim in the post where the corpus is unambiguous, because
@@ -248,13 +256,13 @@ invocation:
 
 <table border="1" cellpadding="5" cellspacing="0">
 <tr><th>model</th><th>low</th><th>medium</th><th>high</th><th>xhigh</th><th>max/ultra</th></tr>
-<tr><td>Sol</td><td>1,123</td><td>1,533</td><td>1,992</td><td>2,707</td><td>4,942 (ultra)</td></tr>
-<tr><td>GPT-5.6 Luna</td><td>1,551</td><td></td><td>2,873</td><td></td><td>5,249 (max)</td></tr>
-<tr><td>GPT-5.3 Codex Spark</td><td>2,308</td><td></td><td>3,529</td><td>4,250</td><td></td></tr>
-<tr><td>Kimi K3</td><td>1,384</td><td></td><td>1,630</td><td></td><td>1,971 (max)</td></tr>
+<tr><td>Sol</td><td>1,124</td><td>1,534</td><td>1,992</td><td>2,708</td><td>4,942 (ultra)</td></tr>
+<tr><td>GPT-5.6 Luna</td><td>1,551</td><td></td><td>2,874</td><td></td><td>5,249 (max)</td></tr>
+<tr><td>GPT-5.3 Codex Spark</td><td>2,308</td><td></td><td>3,530</td><td>4,250</td><td></td></tr>
+<tr><td>Kimi K3</td><td>1,384</td><td></td><td>1,630</td><td></td><td>1,972 (max)</td></tr>
 <tr><td>Fable</td><td></td><td>1,737</td><td>2,008</td><td></td><td></td></tr>
 <tr><td>Claude Haiku 4.5</td><td>2,860</td><td></td><td>2,674</td><td></td><td>2,745 (max)</td></tr>
-<tr><td>Claude Haiku 4.5 (pinned)</td><td>5,227</td><td></td><td>5,757</td><td></td><td>4,840 (max)</td></tr>
+<tr><td>Claude Haiku 4.5 (pinned)</td><td>5,228</td><td></td><td>5,758</td><td></td><td>4,840 (max)</td></tr>
 </table>
 
 <p>
