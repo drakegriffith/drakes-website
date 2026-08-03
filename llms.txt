@@ -15,6 +15,7 @@
 
 ## Posts
 
+- [model-eval: what happens when every model passes](https://drakegriffith.github.io/drakes-website/blog/2026-08-03-model-eval-what-happens-when-every-model-passes.html): August 3, 2026, 2624 words. Every number below traces to the verbatim output of the repo's own stats script ( python3 runner/stats.py ) over the live corpus: 268 result rows, 267 after exc
 - [I killed a week-long experiment because the thing I was testing had already read the answers](https://drakegriffith.github.io/drakes-website/blog/2026-07-28-i-killed-a-week-long-experiment-because-the-thing-i-was-testing-had-already-read-the-answers.html): July 28, 2026, 847 words. I spent about a week building a controlled experiment to find out whether my own setup is worth anything, and then I killed it. The setup is the pile of stuff I
 - [I asked two AI models to destroy my work. They disagreed about how.](https://drakegriffith.github.io/drakes-website/blog/2026-07-26-two-ai-reviewers.html): July 26, 2026, 1301 words. For the last few weeks I have been designing a piece of software, and before any decision gets locked I hand the write-up to two AI models and ask them to break
 - [Hello World](https://drakegriffith.github.io/drakes-website/blog/2026-07-26-hello-world.html): July 26, 2026, 31 words. This is the first post. The point of having your own website is being able to post whatever you want on it without asking anyone. So here it is. More soon.

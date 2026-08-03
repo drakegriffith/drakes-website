@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>model-eval: what happens when every model passes - Drake Griffith</title>
+<link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+<div class="topbar">
+<a class="brand" href="../index.html">Drake Griffith</a>
+<span class="pill">Live</span>
+<span class="spacer"></span>
+<a class="btn" href="mailto:christopherg@actualintelligencelabs.ai">Email Me</a>
+</div>
+
+<p class="nav">
+<a href="../index.html">Home</a>
+<a class="here" href="../blog.html">Blog</a>
+<a href="../about.html">About Me</a>
+<a href="../pledge.html">The Pledge</a>
+<a href="../mcp.html">MCP</a>
+<a href="../links.html">Links</a>
+</p>
+
+<h1>model-eval: what happens when every model passes</h1>
+<p class="date">August 3, 2026</p>
+
+<hr>
+
+<p>
+Every number below traces to the verbatim output of the repo's own stats script
+(<code>python3 runner/stats.py</code>) over the live corpus: 268 result rows, 267
+after exclusions, 154 dual-judged rows, 241 transcripts. Section references like
+"&sect;5" point into that output, which is checked into the repo as
+<code>deliverables/STATS-CURRENT-2026-08-03.md</code>. Nothing here is a number I
+typed in by hand.
+</p>
+
+<p>
+Repo: <a href="https://github.com/drakegriffith/model-eval">github.com/drakegriffith/model-eval</a>
+</p>
+
+<h2>Why I built this</h2>
+
+<p>
+Every benchmark I could find for "is model A better than model B at coding" gave me
+a leaderboard number and nothing to check it against. No transcript, no grading
+rubric, no way to tell whether the task was actually hard or just phrased to favor
+one vendor's house style. I wanted something I could point at my own tasks, run
+against whatever CLI I already had subscription access to (Claude Code, Codex), and
+get back not just a score but the receipts.
+</p>
+
+<p>
+model-eval is that harness. It runs a model headlessly against a small, verifiable
+coding task, scores the result with two independent LLM judges on a shared rubric,
+and writes the transcript, the judgment, and the raw token counts to the same repo
+the code lives in. Nothing about a run's outcome depends on a number I typed in by
+hand afterward.
+</p>
+
+<h2>How a run works</h2>
+
+<p>
+A task is a directory: a starting repo state with a real bug or a real missing
+feature, a <code>verify.sh</code> that fails against the unpatched state and passes
+against a reference fix, and a prompt handed to the model verbatim. The model gets
+the repo and the prompt, runs headlessly to completion, and <code>verify.sh</code>
+either passes or it doesn't. That's the only pass/fail signal in the corpus. No
+judge ever overrides a failing test suite.
+</p>
+
+<p>
+Two things back that up:
+</p>
+
+<ul>
+<li><strong><code>selftest.sh</code> on every task.</strong> Each task proves,
+offline, that its own <code>verify.sh</code> fails on the unpatched base and passes
+once the reference patch is applied. A task that doesn't wire up cleanly fails CI,
+not silently skipped.</li>
+<li><strong>Negative controls.</strong> A subset of runs is an "empty" arm: the
+harness goes through the full prepare/verify/grade path with no fix applied at all,
+to confirm the grader reports a fail when nothing changed. Every negative control in
+the corpus reports <code>passed: false</code>. The grader isn't rubber-stamping.</li>
+</ul>
+
+<p>
+Runs are unattended, which means <code>--dangerously-skip-permissions</code> /
+<code>--dangerously-bypass-approvals-and-sandbox</code> on the CLI side. That's a
+real reduction in the CLI's own safety net, so an OS-level <code>sandbox-exec</code>
+profile and a process-level containment layer sit underneath every invocation
+instead: deny-by-default on credential reads, writes contained to the run's own
+scratch tree, API keys popped from the child's environment so every run is
+subscription-authenticated, never key-authenticated. Full detail in the README's
+security section.
+</p>
+
+<p>
+Once a run finishes, two separate LLM judges (one Claude, one Codex) score the diff
+independently on four dimensions (correctness, simplicity, idiomatic style, spec
+adherence) without seeing each other's verdict.
+</p>
+
+<h2>Finding 1: pass/fail stopped being the interesting number</h2>
+
+<p>
+Across the 267 scorable runs in the current corpus, every model passed every task it
+attempted. 100%. Sol, Fable, Kimi K3, GPT-5.6 Luna, GPT-5.3 Codex Spark, both Claude
+Haiku 4.5 snapshots, all of it. (There are 268 rows on disk. One is excluded as a
+CLI error: the process died before the model got a fair attempt, so its result was
+never earned either way. Exclusions are printed with their counts at the top of the
+stats output rather than being silently dropped.)
+</p>
+
+<p>
+That's not a claim that these models are equivalent. It's a ceiling effect: the task
+set (bug fixes and small feature additions in real repos, the kind of thing
+t1/t2-tier tasks in this corpus cover) is easy enough for current frontier and
+near-frontier models that pass/fail no longer separates them. If I want a benchmark
+that still discriminates as models get better, either the tasks get harder or I stop
+treating pass/fail as the metric that matters. For this corpus, I did the second
+one: the real signal turned out to be cost and judged quality, not whether the test
+suite went green.
+</p>
+
+<h2>Finding 2: at matched tiers, the cost difference between the two big models is noise</h2>
+
+<p>
+<img src="../images/model-eval-token-chart-per-task.png" alt="Bar chart: median output tokens per solved run, Claude Fable relative to Codex Sol, one row per task. Five tasks favor Sol, four favor Fable, largest gap 35 percent, two-sided p equals 0.68." width="900">
+</p>
+
+<p>
+With pass/fail saturated, cost is the obvious next axis. Comparing Claude's Fable
+against Codex's Sol on the 9 tasks both models solved, taking each model's median
+output tokens per solved run on each task (&sect;5):
+</p>
+
+<table border="1" cellpadding="5" cellspacing="0">
+<tr><th>task</th><th>Fable</th><th>Sol</th><th>Fable vs Sol</th></tr>
+<tr><td>t1-py-a</td><td>1,120</td><td>984</td><td>+14%</td></tr>
+<tr><td>t1-py-b</td><td>1,074</td><td>1,164</td><td>-8%</td></tr>
+<tr><td>t1-ts-a</td><td>994</td><td>1,162</td><td>-14%</td></tr>
+<tr><td>t1-ts-b</td><td>1,719</td><td>1,719</td><td>0%</td></tr>
+<tr><td>t2-py-a</td><td>2,420</td><td>1,790</td><td>+35%</td></tr>
+<tr><td>t2-py-b</td><td>2,862</td><td>2,599</td><td>+10%</td></tr>
+<tr><td>t2-ts-a</td><td>3,210</td><td>3,293</td><td>-3%</td></tr>
+<tr><td>t2-ts-b</td><td>2,679</td><td>2,318</td><td>+16%</td></tr>
+<tr><td>t3-a</td><td>2,461</td><td>2,997</td><td>-18%</td></tr>
+</table>
+
+<p>
+Five tasks lean one way, four lean the other, and the largest gap in the set is 35%.
+Run the exact sign-flip permutation test over the per-task log differences and 348
+of the 512 possible sign patterns are as-or-more extreme than the one observed:
+two-sided p = 0.68. There is no detectable cost difference between these two models
+on this corpus, in either direction.
+</p>
+
+<p>
+The careful phrasing is deliberate. "No detectable difference" is not "they cost the
+same." Nine paired tasks is a coarse instrument: the smallest two-sided p this test
+can even produce is 0.004, and that requires all nine tasks pointing the same way. A
+five-four split lands where this one landed no matter how large the underlying
+difference is. A real gap could be sitting under this table, unresolvable at n=9.
+What I can say is that nothing in this data supports choosing between these two
+models to save tokens.
+</p>
+
+<p>
+Two scoping notes. First, the axis is <strong>output tokens only</strong>. Fable's
+input-token counts are quarantined as unreliable on all 64 of its rows while Sol's
+are measured on all 112, so a total-token contrast would put an undercount against a
+true count and manufacture a gap out of a measurement artifact. Second, that table
+pools every passing run of each model across the effort tiers each was run at: Sol's
+pool spans <code>low</code> through <code>ultra</code>, Fable's covers
+<code>medium</code> and <code>high</code>. Tier does move token spend, as Finding 3
+shows, so it's a model-level contrast and not a matched-tier one.
+</p>
+
+<p>
+When I first drafted this section, the matched version wasn't in
+<code>stats.py</code> and I wasn't going to quote a number for it off a spreadsheet
+I'd done by hand. It's in the script now, as &sect;6, and it earns its own
+paragraphs because it doesn't just repeat &sect;5.
+</p>
+
+<p>
+Take a literally matched tier first: same effort label, both models, bare runs only.
+At <code>medium</code>, Fable spends more on 5 of the 8 shared tasks, p = 0.43. At
+<code>high</code>, it spends less on 6 of 8, p = 0.086. Two tiers, opposite signs,
+neither resolvable at n=8. The pooled answer survives the control.
+</p>
+
+<p>
+The one contrast that does come back significant is the pair of cells &sect;2 uses
+for pass/fail: each model at its own winning effort. That's Fable at
+<code>medium</code> against Sol at <code>low</code>, and there Fable spends more on 8
+of 9 tasks, only 4 of the 512 sign patterns are as-or-more extreme, p = 0.008. Read
+the cell names before you read the p-value. Because effort never flipped an outcome
+(Finding 3), "winning effort" collapses to "cheapest tier this model was run at", so
+this compares a medium-tier configuration against a low-tier one and some unknown
+part of the gap is the tier rather than the model. It's also not a symmetric matrix:
+Sol was run at five tiers starting at <code>low</code>, Fable at two starting at
+<code>medium</code>. Fable's cheapest passing configuration here is
+<code>medium</code> because <code>medium</code> is the floor of the run matrix, not
+because anything tested a lower one.
+</p>
+
+<p>
+So: no claim that either model is inherently cheaper survives the matched-tier test,
+in either direction. What does survive is narrower and more useful. If you're
+picking a configuration to deploy on work in this difficulty band, Sol at
+<code>low</code> is the cheapest thing in this corpus that passes everything, and it
+does it at roughly a 1.6x output-token advantage over Fable at <code>medium</code>
+(geometric mean across the 9 shared tasks). Whether Fable at some lower tier would
+close that gap is a run I haven't done.
+</p>
+
+<h2>Finding 3: the effort knob never flipped a single outcome</h2>
+
+<p>
+Every model in this corpus exposes an "effort" knob (low/medium/high, or similar),
+and the working assumption going in was that higher effort should mean better
+outcomes. This is the one claim in the post where the corpus is unambiguous, because
+it's a claim about matched pairs rather than an average.
+</p>
+
+<p>
+&sect;3 walks every adjacent pair of effort rungs, per model, matching runs by task
+and repetition so task difficulty cancels out: Haiku 4.5 and its pinned snapshot,
+Fable, Codex Spark, Luna, Kimi K3, and Sol's full five-rung ladder. That's 15
+comparisons over 144 matched pairs. Across all of them, the number of discordant
+pairs, meaning a task that passed at one effort tier and failed at the adjacent one,
+is <strong>zero</strong>. Not "rarely," not "not statistically significant." Zero,
+everywhere, for every model. The same holds for the two other paired contrasts in
+the file: Fable against Sol at their best tiers (&sect;2, 25 pairs) and bare against
+harnessed invocation (&sect;4, 27 pairs). Nothing in this corpus, turned in either
+direction, ever moved a run across the pass/fail line.
+</p>
+
+<p>
+What the knob did move is spend. Median output tokens per solved run, bare
+invocation:
+</p>
+
+<table border="1" cellpadding="5" cellspacing="0">
+<tr><th>model</th><th>low</th><th>medium</th><th>high</th><th>xhigh</th><th>max/ultra</th></tr>
+<tr><td>Sol</td><td>1,123</td><td>1,533</td><td>1,992</td><td>2,707</td><td>4,942 (ultra)</td></tr>
+<tr><td>GPT-5.6 Luna</td><td>1,551</td><td></td><td>2,873</td><td></td><td>5,249 (max)</td></tr>
+<tr><td>GPT-5.3 Codex Spark</td><td>2,308</td><td></td><td>3,529</td><td>4,250</td><td></td></tr>
+<tr><td>Kimi K3</td><td>1,384</td><td></td><td>1,630</td><td></td><td>1,971 (max)</td></tr>
+<tr><td>Fable</td><td></td><td>1,737</td><td>2,008</td><td></td><td></td></tr>
+<tr><td>Claude Haiku 4.5</td><td>2,860</td><td></td><td>2,674</td><td></td><td>2,745 (max)</td></tr>
+<tr><td>Claude Haiku 4.5 (pinned)</td><td>5,227</td><td></td><td>5,757</td><td></td><td>4,840 (max)</td></tr>
+</table>
+
+<p>
+Sol's <code>ultra</code> costs about 4.4x its <code>low</code>, and Luna's
+<code>max</code> about 3.4x its <code>low</code>, for zero additional passing runs.
+Kimi climbs gently. Both Haiku rows are non-monotonic, and neither one has
+<code>low</code> as its cheapest tier, which is a good reminder that the knob's name
+is a promise about intent and not a guarantee about behavior. (These medians are
+descriptive, not a hypothesis test. They use the same output-tokens-only axis as
+everything else here.)
+</p>
+
+<p>
+The honest limit on this finding is the same ceiling effect from Finding 1. Effort
+can't buy a pass on a task that already passes at the lowest tier. What this corpus
+establishes is that on tasks in this difficulty band, the knob is pure cost. Whether
+it earns its price on harder tasks is exactly the question the corpus can't answer
+yet, and it's the strongest argument for making the task set harder before running
+anything else.
+</p>
+
+<h2>Judged quality: two judges, checked against each other</h2>
+
+<p>
+Pass/fail is binary and, on this corpus, saturated. The judges are where the
+finer-grained signal lives: correctness, simplicity, idiomatic style, and spec
+adherence, each scored 0-10 by two separately-prompted judges (Claude and Codex)
+that never see each other's output.
+</p>
+
+<p>
+Before trusting either judge's score, I checked whether they agree. Averaging each
+judge's four dimension scores into one per-run number and comparing those, the two
+judges land within a point of each other on 95.7% of the 139 runs both judges
+scored. Looking at the four dimensions individually instead of the per-run average,
+agreement is tighter but still solid at 93.2% (518 of 556 judge-pairs within 1
+point). Exact score matches are rarer (about 15% at the per-run level). The judges
+converge on the same rough quality tier far more often than they converge on the
+exact same integer, which is what I'd expect from two independently-prompted graders
+and not a sign that one of them is noise.
+</p>
+
+<p>
+With that agreement established, average judged scores (both judges, all four
+dimensions) for the two models with enough judged runs to be worth reading:
+</p>
+
+<table border="1" cellpadding="5" cellspacing="0">
+<tr><th>model</th><th>correctness</th><th>simplicity</th><th>idiomatic</th><th>spec</th><th>n</th></tr>
+<tr><td>Sol</td><td>9.33</td><td>9.06</td><td>8.93</td><td>9.55</td><td>80</td></tr>
+<tr><td>Fable</td><td>8.83</td><td>8.83</td><td>8.54</td><td>8.96</td><td>57</td></tr>
+</table>
+
+<p>
+Sol scores slightly higher across all four dimensions in this corpus, by about half
+a point on a 0-10 scale. Put next to Finding 2, that's the only axis on which the
+two models separate at all here: identical pass rates, no detectable cost difference
+at matched tiers, and a small judged-quality edge to Sol. Half a point is also
+inside the judges' own mean disagreement with each other (0.53 points, &sect;7), so
+I'd treat it as a hint about where to look next rather than a result. It's a smaller
+and duller claim than "model X is better," and it's the one this data actually
+carries.
+</p>
+
+<h2>One data-quality note, in the open</h2>
+
+<p>
+Not every run's token count came from a clean, direct measurement. Of 268 runs, 148
+have <code>tokens_in_status: measured</code> (read directly off the CLI's own usage
+reporting), 56 are <code>recovered_in_ledger</code> (reconstructed from a secondary
+usage log after the primary read was incomplete), and 64 are
+<code>quarantined</code>, flagged as unreliable. The quarantine is not scattered
+randomly: it's all 64 of Fable's rows, every one of them, while all 112 of Sol's are
+measured. There is no trustworthy input-token number for Fable anywhere in this
+corpus.
+</p>
+
+<p>
+That's why every token figure in this post is output tokens only. It's a known rough
+edge in how different CLIs report usage over long headless sessions, not a hidden
+one, and the field exists specifically so a bad read fails loud in the data rather
+than quietly averaging into a number that looks trustworthy. The next section is
+what happens when you ignore it.
+</p>
+
+<h2>A correction I made to my own draft</h2>
+
+<p>
+The first version of this post led with a much better headline: same pass rate,
+about a fifth of the tokens, p = 0.004. Sol used more tokens than Fable on all 9 of
+9 matched tasks. It was a great chart. It was also wrong, and it was wrong in the
+specific way this whole project exists to catch.
+</p>
+
+<p>
+I had computed cost as <code>tokens_in + tokens_out</code>, which is the obvious
+definition and the wrong one here, because Fable's <code>tokens_in</code> is
+quarantined on 100% of its rows. I was comparing Fable's undercounted total against
+Sol's complete one and reading the measurement gap as a performance gap. Worse, the
+repo's own stats script had already been corrected for exactly this reason days
+earlier, on 2026-07-30, and states the output-tokens-only rule in a comment. I
+didn't run it. I recomputed the numbers by hand instead, and my hand-rolled version
+quietly reintroduced the bug the script had been fixed to prevent.
+</p>
+
+<p>
+Run the script and the flagship finding evaporates: p = 0.68, direction mixed,
+nothing detectable. That's Finding 2 above.
+</p>
+
+<p>
+I'm leaving this in the post rather than quietly fixing the numbers, for two
+reasons. The first is that a benchmark asking you to trust its methodology should
+show you the time its methodology caught the author. The second is that the failure
+mode generalizes past me: a number that is 4.8x and p = 0.004 and confirms something
+you already half-believed is exactly the number that doesn't get a second look. The
+wrong chart is still in the repo under
+<code>assets/model-eval-token-chart-WRONG-DO-NOT-USE.png</code>, and it looks
+completely convincing, which is the point.
+</p>
+
+<h2>Try it</h2>
+
+<p>
+No UI, no signup, no API key required for the smoke test:
+</p>
+
+<pre>
+git clone https://github.com/drakegriffith/model-eval
+cd model-eval
+
+# offline: proves the task is real by showing verify.sh
+# fail, then pass, once the reference fix is applied
+bash tasks/t1-py-a/selftest.sh
+
+# exercises the full harness pipeline, no tokens spent,
+# no API key needed
+python3 runner/run.py --mock --limit 1
+</pre>
+
+<p>
+Point <code>runner/run.py</code> at your own Claude Code or Codex CLI (subscription
+auth, no key needed) to run a live model against a task and see how it does.
+<code>CONTRIBUTING.md</code> covers adding a new task or a new model to the registry.
+</p>
+
+<p>
+Repo: <a href="https://github.com/drakegriffith/model-eval">github.com/drakegriffith/model-eval</a>
+</p>
+
+
+<hr>
+<p><a class="btn" href="../blog.html">&laquo; Back to blog</a></p>
+
+<p class="footer">
+&copy; 2026 Drake Griffith. All rights reserved.
+</p>
+
+</body>
+</html>
