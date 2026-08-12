@@ -1,0 +1,197 @@
+<p><em>Every number below comes out of the experiment runner checked into the repo
+(<code>scripts/run_ab.py</code>), over two runs whose complete records, including every
+individual judge vote before consolidation, are in <code>results.json</code>. The two
+analysis errors I found in my own output are in here too, because I found both of
+them after I had already reported a number.</em></p>
+
+<p>Repo: <a href="https://github.com/drakegriffith/deadweight">github.com/drakegriffith/deadweight</a></p>
+
+<h2>The idea</h2>
+
+<p>My <code>CLAUDE.md</code> is 129 rules. A lot of them are not judgment calls. "Commit
+subjects under 50 characters." "No emoji." "Never hard-code an API key." Those are
+regexes wearing a trench coat. I am asking a language model to probabilistically
+remember something a three-line script would settle every single time, for free.</p>
+
+<p>So the obvious move is to convert them. Pull the mechanical rules out of the file,
+turn them into bash and Python, wire them in as hooks that run before the model gets
+a turn. I built a tool to do it. It reads a rule file and sorts every clause into
+what a check can enforce, what needs a mind, and what honestly reads both ways. On
+my file: 53 of 129 rules, 41%, could be a script.</p>
+
+<p>My first pitch to myself was token savings. That died on contact with arithmetic.
+A 20 KB rule file is about 5,000 tokens sitting in a cached prefix. Cutting a third
+of it saves maybe a thousand tokens a session. That is nothing.</p>
+
+<p>The better story was attention. There is real work showing instruction compliance
+decays as instruction count rises: the more rules you write, the smaller the
+fraction the model actually follows, and it does not drop the ones you would pick.
+So every mechanical rule sitting in that file is competing for attention with a
+rule that genuinely needs interpretation. Trim the first kind, and the second kind
+should get followed more.</p>
+
+<p>That is a testable claim. I tested it. It did not hold.</p>
+
+<h2>How I tested it</h2>
+
+<p>Two arms. Arm A is my real <code>CLAUDE.md</code>, 129 rules, 4,852 tokens. Arm B is the
+same file with the 53 mechanizable rules stripped out, 3,033 tokens. The tool
+generated arm B, I did not hand-edit it, because hand-editing the trimmed version
+measures my transcription rather than the trim. Both arms are byte-identical
+outside the cut.</p>
+
+<p>Every cell is its own agent with its own fresh context. No agent ever sees both
+arms, because an agent that does task 3 under arm A and then again under arm B has
+already seen the answer, and the second run measures memory. Then separate judge
+agents, blind to which arm they are scoring, grade each artifact against six rules
+present in both files.</p>
+
+<p>One thing that turned out to matter more than anything else in the harness: the
+runner refuses to start until it proves the arm directory is actually isolated. It
+plants a canary that contradicts my real config and checks the canary comes back.
+Without that, both arms silently read the ambient <code>~/.claude/CLAUDE.md</code> and arm B
+is just arm A wearing a different name. I would have gotten a beautiful null result
+that meant nothing at all.</p>
+
+<p>Round 1: 10 tasks, 3 repetitions, 60 runs, 360 judgings.<br>
+Round 2: 10 new tasks, 5 repetitions, 100 runs, 1,200 judgings, two judges per
+artifact.</p>
+
+<h2>What came back</h2>
+
+<p>Round 1 looked promising. The rule about phrasing questions in plain English came
+back +0.45, which is a large effect, in the predicted direction.</p>
+
+<p>It was not real. It fired in only 12 or 13 of 30 runs per arm, because most of my
+tasks did not invite a question. Six rules were tested at once with no primary
+endpoint declared, so the multiple-comparison correction ate it: p of 0.041
+unadjusted became 0.246 adjusted. And the test that treats each task as the unit,
+which is the honest one because three repetitions of the same task are not three
+independent draws, put it at 0.250.</p>
+
+<p>So round 2 was built to resolve exactly that rule. New tasks, every one of them
+putting a genuine fork in front of the user so a question is nearly forced. One
+primary endpoint declared in the task file before the run, read by the runner, so
+it could not be picked after the numbers landed. Two judges on every artifact so I
+could finally measure whether the judges agree with each other.</p>
+
+<p>The task redesign worked. The rule went from firing in 12 of 30 runs to 50 of 50,
+in both arms.</p>
+
+<p>The effect went from +0.45 to +0.02.</p>
+
+<table>
+<tr><th>rule</th><th>round</th><th>arm A</th><th>arm B</th><th>delta</th></tr>
+<tr><td>output must be concise</td><td>1</td><td>12/30</td><td>12/30</td><td>+0.00</td></tr>
+<tr><td>output must be concise</td><td>2</td><td>4/50</td><td>4/50</td><td>+0.00</td></tr>
+<tr><td>questions in plain English</td><td>1</td><td>5/13</td><td>10/12</td><td>+0.45</td></tr>
+<tr><td>questions in plain English</td><td>2</td><td>5/50</td><td>6/50</td><td>+0.02</td></tr>
+<tr><td>no emoji, no em dashes</td><td>1</td><td>19/30</td><td>18/30</td><td>-0.03</td></tr>
+<tr><td>no emoji, no em dashes</td><td>2</td><td>38/50</td><td>34/50</td><td>-0.08</td></tr>
+<tr><td>land the work, do not narrate</td><td>1</td><td>15/16</td><td>16/18</td><td>-0.05</td></tr>
+<tr><td>land the work, do not narrate</td><td>2</td><td>26/37</td><td>23/35</td><td>-0.06</td></tr>
+</table>
+
+<p>The line I keep coming back to is the first two rows. "Terminal output must be
+extremely concise" is the best-measured rule in the whole design, because unlike
+the others it has an opportunity to apply in literally every single run. It came
+back 12/30 against 12/30. Then, in a completely different round with different
+tasks, a different rubric, and a different repetition count, it came back 4/50
+against 4/50.</p>
+
+<p>Identical. Twice. Cutting 41% of my rule file changed nothing about whether Claude
+was concise.</p>
+
+<h2>Two errors I made</h2>
+
+<p>Both of these I caught after I had already reported a number, and both of them
+changed the conclusion.</p>
+
+<p><strong>I computed statistical power off the wrong denominator.</strong> My runner printed
+the smallest p-value the test could possibly return given the design, which is a
+useful thing to see next to a p-value, because sometimes a rule could never have
+come out significant no matter what the model did. I computed it from the number of
+paired tasks. It should have been the number of tasks where the two arms actually
+scored differently. A task that ties contributes nothing to that kind of test.</p>
+
+<p>Round 2's primary endpoint printed a floor of 0.002 off ten paired tasks. Eight of
+those ten scored 0/5 in both arms. The real floor was 0.500. So my runner cheerfully
+printed "the primary endpoint is powered" under a result that could not have
+reached significance under any circumstances. The null still stands, for reasons
+below, but it is a null measured at the floor rather than the clean one I first
+reported.</p>
+
+<p><strong>A dead measure printed as a null.</strong> One rule scored 0/26 in arm A and 0/29 in
+arm B. My table rendered that as <code>+0.00</code>, sitting in a column next to genuine
+nulls, looking exactly like them. But zero variance is not a null. It means the
+measure cannot detect anything at all. The judges had drifted into scoring "did
+this run delegate to a subagent," and a headless <code>claude -p</code> worker never does,
+so the answer was always no and the instrument was dead.</p>
+
+<p>That one stung, because it is precisely the failure this tool exists to catch. A
+check that ran and found nothing, and a check that never really ran, look identical
+from the outside unless you build something that makes them look different. I found
+it in my own output. Both are fixed: the floor is now computed from informative
+tasks, and zero-variance rules print DEGENERATE with the words "this is a broken
+measure, not a null result."</p>
+
+<h2>Why I am closing it anyway</h2>
+
+<p>Three reasons.</p>
+
+<p>The best-measured endpoint returned an identical count twice, in two independent
+rounds. That is a replicated null on the one rule the design actually measured
+well.</p>
+
+<p>The one promising signal collapsed the moment I gave it enough opportunities to
+resolve. +0.45 down to +0.02, with a confidence interval that rules out any
+improvement above about 14 points. A large effect that evaporates once you power it
+is the textbook signature of a first-round false positive.</p>
+
+<p>And the judges were not the problem. Two judges per artifact in round 2 agreed 97.5%
+of the time on whether a rule even had a chance to apply, and 95.5% on whether it
+was followed. Only 5.8% split decisions. The instrument is stable. There is just
+nothing there for it to find.</p>
+
+<p>What I will not do is run a third round with new tasks until the effect shows up.
+That is the exact behavior this whole project is supposed to make harder. I wrote
+down the prediction before the run, twice, and it failed both times.</p>
+
+<h2>What the null actually covers</h2>
+
+<p>I want to be precise, because "it did nothing" is easy to overstate.</p>
+
+<p>Ruled out: a large attention effect from trimming 41% of a 4,850-token rule file,
+on one model, with one person's rule file.</p>
+
+<p>Not ruled out: a small effect. A much bigger rule surface, where the decay research
+would predict more headroom than my 129 rules give. Other models. Trimming by some
+criterion other than "a script could do this."</p>
+
+<p>One seat, one file, one writing style. Nothing here says this generalizes, and the
+version of me that got +0.45 in round 1 and stopped there would have written a much
+more exciting blog post about a result that was not there.</p>
+
+<h2>What survives</h2>
+
+<p>The tool still does something I want, it just is not the thing I pitched.</p>
+
+<p>Converting a mechanical rule into a hook makes it deterministic. That was never the
+part in question; a regex checking commit subject length is right 100% of the time
+and a language model reading a bullet point is not. The thing I was testing was
+whether that conversion also bought a bonus effect on the rules left behind. It does
+not. Fine. The conversion is still worth doing on its own terms.</p>
+
+<p>And the part I actually care about is unaffected, because it never depended on
+attention at all: verifying the hooks are still running. What kicked this project
+off was auditing my own machine and finding a retrieval hook that had been timing
+out 104 times a day for two weeks. It exited quietly. It logged one line at session
+start that I scrolled past every single time. The rule it enforced had simply
+stopped being enforced, and nothing anywhere told me.</p>
+
+<p>Every tool in this space converts rules to hooks. None of them check the hooks are
+alive. That is the part I am keeping.</p>
+
+<p>The full write-up, with corrected numbers for both rounds and every methodological
+fault I know about, is at <code>docs/ab-result.md</code> in the repo. If you think I got the
+statistics wrong, the raw judge votes are all in there and I would like to know.</p>
