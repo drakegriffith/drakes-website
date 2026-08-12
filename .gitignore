@@ -8,3 +8,7 @@ sign/.dev.vars
 *.env
 .wrangler/
 .scratch/
+
+# unpublished drafts
+draft-*.html
+.draft-*.local
