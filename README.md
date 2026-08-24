@@ -63,9 +63,10 @@ printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' \
 ## The pledge registry
 
 The API is deployed: a Cloudflare Worker at
-`https://pledge-registry.actualintelligence.workers.dev`, backed by D1. The published
-form does not point at it yet, so on the live site it still says so plainly and
-records nothing. Wiring that up is issue #9.
+`https://pledge-registry.actualintelligence.workers.dev`, backed by D1, currently
+holding zero rows. No page on this site calls it: signing moved to the hub's own
+`/pledge` page before the wiring landed, so `sign.html` is a signpost, `banned.html`
+is a stub, and the wiring issue #9 describes was overtaken, not done.
 
 Two adapters, one set of rules. `sign/registry.mjs` holds the rules and knows
 nothing about HTTP; `sign/server.js` runs them on Node against a local SQLite
