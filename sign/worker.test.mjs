@@ -18,6 +18,12 @@
  *
  *   PLEDGE_BASE_URL=http://127.0.0.1:8788 ADMIN_TOKEN=... node --test sign/worker.test.mjs
  *   PLEDGE_BASE_URL=https://pledge-registry.actualintelligence.workers.dev node --test sign/worker.test.mjs
+ *
+ * Rate limit (issue #5): POST /api/sign consumes one per-IP token per minute
+ * once the body parses. Locally each request sends a unique fake
+ * CF-Connecting-IP so tests do not trip each other; Cloudflare overwrites that
+ * header in production, so the deployed run keeps the caller's real bucket and
+ * the dedicated 429 test tolerates an already-tripped one.
  */
 
 import test from "node:test";
@@ -36,11 +42,19 @@ const OTHER_EMAIL = `other-${RUN}@example.invalid`;
 const baseline = { count: 0, banned: 0 };
 let signedNumber = null;
 
+/* TEST-NET-3 addresses; the suite stays far below 254 requests. */
+let ipCounter = 0;
+function fakeIp() {
+  ipCounter += 1;
+  return `203.0.113.${ipCounter}`;
+}
+
 function json(method, path, body, extraHeaders = {}) {
   return fetch(BASE + path, {
     method,
     headers: {
       "content-type": "application/json",
+      "cf-connecting-ip": fakeIp(),
       ...extraHeaders,
     },
     body: body === undefined ? undefined : JSON.stringify(body),
@@ -123,7 +137,10 @@ signedTest("duplicate email is 200 already_signed, case-insensitive", async () =
   noEmailLeak(JSON.stringify(body));
 });
 
-test("validation errors return 400 without writing a row", async () => {
+/* Local-only: each of these parses cleanly, so each consumes a rate-limit
+   token. Deployed, they would drain the caller's single per-IP bucket and
+   collide with the dedicated 429 test below. */
+signedTest("validation errors return 400 without writing a row", async () => {
   const cases = [
     { name: "", email: "x@example.invalid", agreed: true },
     { name: "z".repeat(121), email: "x@example.invalid", agreed: true },
@@ -143,18 +160,49 @@ test("validation errors return 400 without writing a row", async () => {
 });
 
 test("malformed request bodies return 400", async () => {
-  const empty = await fetch(BASE + "/api/sign", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-  });
-  assert.equal(empty.status, 400);
+  if (!IS_DEPLOYED) {
+    /* An empty body parses to {} and consumes a token, so deployed runs skip
+       it to keep the caller's bucket for the dedicated 429 test. */
+    const empty = await fetch(BASE + "/api/sign", {
+      method: "POST",
+      headers: { "content-type": "application/json", "cf-connecting-ip": fakeIp() },
+    });
+    assert.equal(empty.status, 400);
+  }
 
   const broken = await fetch(BASE + "/api/sign", {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json", "cf-connecting-ip": fakeIp() },
     body: "{not json",
   });
   assert.equal(broken.status, 400);
+});
+
+test("oversized body returns 413 without consuming a rate-limit token", async () => {
+  const res = await json("POST", "/api/sign", {
+    name: "Nobody",
+    email: "x@example.invalid",
+    agreed: true,
+    padding: "z".repeat(65 * 1024),
+  });
+  assert.equal(res.status, 413);
+  assert.equal((await res.json()).ok, false);
+});
+
+test("second rapid sign attempt from one IP is rate limited with 429", async () => {
+  const rejected = { name: "Nobody", email: "x@example.invalid", agreed: false };
+  const ip = { "cf-connecting-ip": fakeIp() };
+  const first = await json("POST", "/api/sign", rejected, ip);
+  const second = await json("POST", "/api/sign", rejected, ip);
+  /* Consent-false never writes a row, so this is production-safe. On a rerun
+     inside the 60s window the caller's real bucket may already be empty, so
+     the first response is allowed to be a 429 too. */
+  assert.ok([400, 429].includes(first.status), `first was ${first.status}`);
+  assert.equal(second.status, 429);
+  assert.equal(second.headers.get("retry-after"), "60");
+  const body = await second.json();
+  assert.equal(body.ok, false);
+  noEmailLeak(JSON.stringify(body));
 });
 
 signedTest("admin ban returns 200 and status reports banned", async () => {

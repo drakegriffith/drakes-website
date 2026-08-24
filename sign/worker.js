@@ -37,8 +37,8 @@ import * as registry from "./registry.mjs";
 const PAGES_ORIGIN = "https://drakegriffith.github.io";
 const LOCAL_ORIGIN = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
 
-/* Matches server.js. The real cap is a rate-limit question — see issue #5. */
-const MAX_BODY = 64 * 1024;
+const MAX_BODY_BYTES = 64 * 1024;
+const RATE_LIMIT_WINDOW_SECONDS = 60;
 
 const JSON_HEADERS = {
   "content-type": "application/json; charset=utf-8",
@@ -57,10 +57,10 @@ function corsHeaders(request) {
   };
 }
 
-function json(request, code, body) {
+function json(request, code, body, extraHeaders = {}) {
   return new Response(JSON.stringify(body), {
     status: code,
-    headers: { ...JSON_HEADERS, ...corsHeaders(request) },
+    headers: { ...JSON_HEADERS, ...corsHeaders(request), ...extraHeaders },
   });
 }
 
@@ -75,14 +75,54 @@ function d1Store(db) {
   };
 }
 
+class RequestError extends Error {
+  constructor(status, message) {
+    super(message);
+    this.status = status;
+  }
+}
+
+function bodyTooLarge() {
+  return new RequestError(413, "Request body is too large. The limit is 64 KB.");
+}
+
 async function readBody(request) {
-  const raw = await request.text();
-  if (raw.length > MAX_BODY) throw new Error("body too large");
+  const declaredLength = Number(request.headers.get("content-length"));
+  if (declaredLength > MAX_BODY_BYTES) throw bodyTooLarge();
+
+  const reader = request.body?.getReader();
+  if (!reader) return {};
+
+  const chunks = [];
+  let size = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > MAX_BODY_BYTES) {
+      try {
+        await reader.cancel();
+      } catch {
+        // The 413 still wins if the client has already aborted the stream.
+      }
+      throw bodyTooLarge();
+    }
+    chunks.push(value);
+  }
+
+  const bytes = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+
+  const raw = new TextDecoder().decode(bytes);
   if (!raw.trim()) return {};
   try {
     return JSON.parse(raw);
-  } catch (e) {
-    throw new Error("body is not valid JSON");
+  } catch {
+    throw new RequestError(400, "body is not valid JSON");
   }
 }
 
@@ -112,15 +152,16 @@ function authorised(request, env) {
  *          GET /api/signatures, GET /api/status?email=, POST /api/ban,
  *          POST /api/unban, GET /api/health. Anything else is a 404.
  * env      the Worker bindings — `DB`, a D1 database carrying the schema in
- *          sign/schema.sql, and `ADMIN_TOKEN`, a secret. `DB` is required;
- *          without `ADMIN_TOKEN` the two admin routes answer 401 forever,
- *          which is the intended failure.
+ *          sign/schema.sql; `SIGN_RATE_LIMITER`, the per-IP sign limiter; and
+ *          `ADMIN_TOKEN`, a secret. `DB` and the limiter are required; without
+ *          `ADMIN_TOKEN` the two admin routes answer 401 forever, which is the
+ *          intended failure.
  * returns  a Response, always JSON except the 204 preflight, always
  *          no-store, carrying whatever `{ code, body }` the core resolved to.
  * effects  none of its own. The core writes a row on a successful sign, and
  *          updates one on a successful ban or unban.
- * throws   nothing. A throw from the body reader or the driver becomes a 400
- *          carrying its message, matching server.js.
+ * throws   nothing. Known request errors keep their 4xx status; any other throw
+ *          from the body reader or driver becomes a 400 carrying its message.
  */
 export default {
   async fetch(request, env) {
@@ -164,7 +205,18 @@ export default {
       }
 
       if (method === "POST" && pathname === "/api/sign") {
-        return send(await registry.sign(store, await readBody(request)));
+        const body = await readBody(request);
+        const ip = request.headers.get("cf-connecting-ip") || "unknown";
+        const { success } = await env.SIGN_RATE_LIMITER.limit({ key: ip });
+        if (!success) {
+          return json(
+            request,
+            429,
+            { ok: false, error: "Too many signing attempts from this connection. Try again in a minute." },
+            { "retry-after": String(RATE_LIMIT_WINDOW_SECONDS) },
+          );
+        }
+        return send(await registry.sign(store, body));
       }
 
       if (method === "POST" && (pathname === "/api/ban" || pathname === "/api/unban")) {
@@ -176,7 +228,8 @@ export default {
 
       return json(request, 404, { ok: false, error: `No such endpoint: ${pathname}` });
     } catch (e) {
-      return json(request, 400, { ok: false, error: e.message || String(e) });
+      const code = e instanceof RequestError ? e.status : 400;
+      return json(request, code, { ok: false, error: e.message || String(e) });
     }
   },
 };
