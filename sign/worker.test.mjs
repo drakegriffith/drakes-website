@@ -42,11 +42,14 @@ const OTHER_EMAIL = `other-${RUN}@example.invalid`;
 const baseline = { count: 0, banned: 0 };
 let signedNumber = null;
 
-/* TEST-NET-3 addresses; the suite stays far below 254 requests. */
+/* TEST-NET-3 addresses; the suite stays far below 254 requests. Local only:
+   Cloudflare's edge answers 403 (error 1000) to any client-supplied
+   CF-Connecting-IP, so deployed requests must never carry it. */
 let ipCounter = 0;
-function fakeIp() {
+function fakeIpHeader() {
+  if (IS_DEPLOYED) return {};
   ipCounter += 1;
-  return `203.0.113.${ipCounter}`;
+  return { "cf-connecting-ip": `203.0.113.${ipCounter}` };
 }
 
 function json(method, path, body, extraHeaders = {}) {
@@ -54,7 +57,7 @@ function json(method, path, body, extraHeaders = {}) {
     method,
     headers: {
       "content-type": "application/json",
-      "cf-connecting-ip": fakeIp(),
+      ...fakeIpHeader(),
       ...extraHeaders,
     },
     body: body === undefined ? undefined : JSON.stringify(body),
@@ -165,14 +168,14 @@ test("malformed request bodies return 400", async () => {
        it to keep the caller's bucket for the dedicated 429 test. */
     const empty = await fetch(BASE + "/api/sign", {
       method: "POST",
-      headers: { "content-type": "application/json", "cf-connecting-ip": fakeIp() },
+      headers: { "content-type": "application/json", ...fakeIpHeader() },
     });
     assert.equal(empty.status, 400);
   }
 
   const broken = await fetch(BASE + "/api/sign", {
     method: "POST",
-    headers: { "content-type": "application/json", "cf-connecting-ip": fakeIp() },
+    headers: { "content-type": "application/json", ...fakeIpHeader() },
     body: "{not json",
   });
   assert.equal(broken.status, 400);
@@ -189,20 +192,41 @@ test("oversized body returns 413 without consuming a rate-limit token", async ()
   assert.equal((await res.json()).ok, false);
 });
 
-test("second rapid sign attempt from one IP is rate limited with 429", async () => {
+test("rapid sign attempts from one IP get rate limited with 429", async () => {
+  /* Consent-false never writes a row, so this is production-safe. Locally
+     miniflare enforces the limit strictly: second post from one IP is a 429.
+     Deployed, Cloudflare's binding is per-location and eventually consistent
+     (observed live: burst of six gave 400 400 400 429 400 429), so the
+     deployed assertion is: a burst never yields a 2xx and trips at least one
+     429 - the screen-door contract, not a turnstile. */
   const rejected = { name: "Nobody", email: "x@example.invalid", agreed: false };
-  const ip = { "cf-connecting-ip": fakeIp() };
-  const first = await json("POST", "/api/sign", rejected, ip);
-  const second = await json("POST", "/api/sign", rejected, ip);
-  /* Consent-false never writes a row, so this is production-safe. On a rerun
-     inside the 60s window the caller's real bucket may already be empty, so
-     the first response is allowed to be a 429 too. */
-  assert.ok([400, 429].includes(first.status), `first was ${first.status}`);
-  assert.equal(second.status, 429);
-  assert.equal(second.headers.get("retry-after"), "60");
-  const body = await second.json();
-  assert.equal(body.ok, false);
-  noEmailLeak(JSON.stringify(body));
+  const ip = fakeIpHeader();
+
+  if (!IS_DEPLOYED) {
+    const first = await json("POST", "/api/sign", rejected, ip);
+    const second = await json("POST", "/api/sign", rejected, ip);
+    assert.equal(first.status, 400);
+    assert.equal(second.status, 429);
+    assert.equal(second.headers.get("retry-after"), "60");
+    const body = await second.json();
+    assert.equal(body.ok, false);
+    noEmailLeak(JSON.stringify(body));
+    return;
+  }
+
+  const statuses = [];
+  for (let i = 0; i < 6; i++) {
+    const res = await json("POST", "/api/sign", rejected, ip);
+    statuses.push(res.status);
+    if (res.status === 429) {
+      assert.equal(res.headers.get("retry-after"), "60");
+    }
+  }
+  assert.ok(
+    statuses.every((s) => s === 400 || s === 429),
+    `unexpected statuses: ${statuses}`,
+  );
+  assert.ok(statuses.includes(429), `no 429 in burst: ${statuses}`);
 });
 
 signedTest("admin ban returns 200 and status reports banned", async () => {
