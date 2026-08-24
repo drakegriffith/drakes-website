@@ -79,15 +79,23 @@ ADMIN_TOKEN=something node sign/server.js   # http://localhost:8787, serves the 
 Ban someone:
 
 ```bash
-curl -X POST localhost:8787/api/ban -H 'x-admin-token: something' \
-     -H 'content-type: application/json' \
-     -d '{"email":"them@example.com","reason":"Every paragraph the same length."}'
+./sign/ban.sh them@example.com "Every paragraph the same length."
+./sign/ban.sh --unban them@example.com
+./sign/ban.sh --local them@example.com "reason"   # against node sign/server.js
 ```
 
-The deployed API takes the same call — swap the host, and the token is the one
-in `.secrets/pledge-registry.env`. It allows the Pages origin and localhost and
-nothing else, so a page opened with a `file://` URL cannot sign; use the local
-server for that.
+It hits the deployed registry by default, prints the row it changed, then reads
+the public list back so you can see the ban took. A ban is not a deletion: the
+row stays listed with the reason and date showing. The token comes from
+`~/brain-actual-intelligence/.secrets/pledge-registry.env` and is never an
+argument — arguments land in shell history. It tells you what to do when the
+file is missing (no token file), when the token is stale (`401`), and when
+nobody by that email has signed (`404`).
+
+Underneath it is one `POST /api/ban` with an `x-admin-token` header, so curl
+still works if you would rather. The API allows the Pages origin and localhost
+and nothing else, so a page opened with a `file://` URL cannot sign; use the
+local server for that.
 
 `sign/signatures.db` is gitignored and is the local server's state only. The
 deployed registry's rows live in D1, which nothing in this repo can hold.
