@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My vault is 53 percent broken, or 12.8 percent, depending on who wrote the resolver - Drake Griffith</title>
+<link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+<div class="topbar">
+<a class="brand" href="../index.html">Drake Griffith</a>
+<span class="pill">Live</span>
+<span class="spacer"></span>
+<a class="btn" href="mailto:christopherg@actualintelligencelabs.ai">Email Me</a>
+</div>
+
+<p class="nav">
+<a href="../index.html">Home</a>
+<a class="here" href="../blog.html">Blog</a>
+<a href="../about.html">About Me</a>
+<a href="../pledge.html">The Pledge</a>
+<a href="../mcp.html">MCP</a>
+<a href="../links.html">Links</a>
+</p>
+
+<h1>My vault is 53 percent broken, or 12.8 percent, depending on who wrote the resolver</h1>
+<p class="date">August 12, 2026</p>
+
+<hr>
+
+<p>
+I spent a day measuring my own note vault. It is 3,969 markdown files, written partly by me and partly by agents working for me, cross-linked with wikilinks. I wanted the boring graph numbers. How far apart two notes are. How much of the thing is reachable by walking. How much of it has rotted.
+</p>
+
+<p>
+Every headline number I got that day was wrong by a factor of two or more on the first reading. Not slightly off. Wrong enough to point at a different problem and justify a different weekend of work. Every correction came from the same move, and it was never a smarter analysis. It was asking how the number had been measured instead of arguing with what it said.
+</p>
+
+<h2>The same vault is 53 percent broken and 12.8 percent broken</h2>
+
+<p>
+Three readings of link rot, taken the same afternoon on the same files:
+</p>
+
+<table border="1" cellpadding="5" cellspacing="0">
+<tr><th>how it was measured</th><th>result</th></tr>
+<tr><td>filename-only resolver, whole tree including <code>.claude/</code>, session logs, agent worktrees</td><td>53% broken</td></tr>
+<tr><td>filename-only resolver, second attempt</td><td>42.6% broken</td></tr>
+<tr><td>real Obsidian semantics (file-relative, then vault-relative, then filename), knowledge directories only</td><td>80.7% clean, 6.5% ambiguous, <strong>12.8% broken</strong></td></tr>
+</table>
+
+<p>
+Two independent errors compounded. The first is the resolver. A filename-only matcher looks for a file whose name is exactly the text in the brackets, which fails every link written as a path, and there are thousands of those. The second is the denominator. The tree I first walked included machinery: session logs, hook state, and a stray agent git worktree checked in under <code>.claude/worktrees/</code> holding duplicate copies of real reference files. Machinery does not merely pad a file count. Those duplicates are alternate targets, so they change how every link downstream resolves.
+</p>
+
+<p>
+The scary number was the wrong one, and if I had believed it I would have spent the weekend repairing links that were already fine. The rule I took away is narrow and I would now apply it to anyone else's vault statistic: a link rot figure is meaningless without the resolver and the excluded directories stated beside it. Publish both or publish nothing.
+</p>
+
+<h2>The actual defect is that 329 files are named index</h2>
+
+<p>
+240 basenames in this vault are shared by more than one file, covering 938 files between them. The worst offender is <code>index</code>, which is the name of 329 different files sitting in 329 different directories. A second count of the same property said 349, which tells you something about how stable any of this is.
+</p>
+
+<p>
+So when a note contains <code>[[index]]</code>, Obsidian picks one. If an <code>index</code> happens to sit in the folder doing the linking, it picks that one and my audit calls the link clean. Otherwise it picks by a rule nobody has in their head while typing. The link is not broken. It resolves. It just does not necessarily resolve to the thing anyone meant, and no checker will ever say a word about it.
+</p>
+
+<p>
+That is a different failure from rot and it wants a different fix. Rot is a target that moved, and you repair it by finding the new target. Collision is a target that is fine and an address that is ambiguous, and you repair it by renaming files or by writing links as paths. No amount of broken-link checking surfaces it, because none of these links are broken. Four independent methods agreed it was there: the Obsidian-semantics audit, 35 slug-mismatch failures in the sync tool, a graph collapse experiment, and the frontmatter validator.
+</p>
+
+<p>
+The sync tool also offered me a fix. Turn on global basename resolution and 76 percent of bare wikilinks would resolve. With 329 files named <code>index</code>, that setting resolves them arbitrarily, manufactures edges that do not exist, and makes every connectivity number in this post look better while meaning less.
+</p>
+
+<h2>A fifth of the connectivity is an artifact of boring names</h2>
+
+<p>
+Build the graph collapsing files that share a name into one node, which is what you get if you think in terms of link text rather than files, and the largest connected component holds 63.4 percent of the vault. Drop the <code>index</code> node alone and it falls to 54.8 percent. Drop the six most generic basenames and it falls to 42.8 percent.
+</p>
+
+<p>
+So roughly a fifth of my vault's apparent connectivity is an artifact of files having dull names. The graph looks better connected than it is because the measurement welded unrelated regions together at their shared filenames. This is the most uncomfortable number in the set, and it is one nobody sees without running the ablation. Drop your top node and watch what happens. If the graph collapses, it was being held together by a filename rather than by anything you meant.
+</p>
+
+<h2>The topology, with the ranges left in</h2>
+
+<table border="1" cellpadding="5" cellspacing="0">
+<tr><th>property</th><th>value</th></tr>
+<tr><td>median branching factor</td><td>1-2</td></tr>
+<tr><td>mean shortest path</td><td>3.94-4.58 hops</td></tr>
+<tr><td>diameter</td><td>13</td></tr>
+<tr><td>connected components</td><td>821-1,030</td></tr>
+<tr><td>complete singletons</td><td>800-991</td></tr>
+<tr><td>paths passing through a top-20 hub</td><td>97.3-98%</td></tr>
+<tr><td>median cost to read one note</td><td>1,301 tokens</td></tr>
+<tr><td>median cost to read one frontmatter block</td><td>85 tokens</td></tr>
+</table>
+
+<p>
+The ranges are two independent measurements that differ by method, and I am printing both rather than picking my favorite. Direction is unanimous, magnitude is method-dependent, and that gap is the whole subject of this post.
+</p>
+
+<p>
+The shape is an airline network, not a mesh. Almost nothing connects to anything directly and nearly every route runs through one of twenty junctions. Somewhere between 800 and 991 files have no resolved link in or out at all, so no traversal algorithm can ever reach them, because there is nothing to traverse. The one cheerful number is the last row: you can skim the frontmatter of every note in the vault for about the cost of reading a hundred and fifty of them in full.
+</p>
+
+<p>
+I went looking for published versions of these measurements for Obsidian or Zettelkasten vaults and found none. The nearest neighbors are Wikidata communication networks and the Steyvers and Tenenbaum semantic networks, neither of which is a pile one person built by hand for themselves. So this may be the first published set for this shape of thing, which mostly means nobody has a second one to check it against.
+</p>
+
+<h2>Two numbers I was handed that did not survive</h2>
+
+<p>
+The first was that a typical node has about 8 candidate paths three hops out. That was a tidy argument: the search space is small, so a greedy walk is all you need. The real figure is a median of 491 nodes at exactly three hops. The neighborhood explodes the moment you touch a hub. The conclusion happened to survive but the reason changed completely, and the honest reason is that you cannot know whether a hop was worth taking until you have read the node, and reading is the entire cost.
+</p>
+
+<p>
+The second was a citation. PropRAG's representation change was relayed to me as buying +4. Checking the paper, the representation ablation buys +0.8 Recall@5, and widening the beam from 1 to 4 buys +1.4. The +4 does appear in that paper, attached to a different metric on a different dataset against a different baseline. At +4 the sentence is that representation beats search by a mile. At +0.8 the sentence is that neither of them matters much. Those are two different posts, and I nearly published the wrong one.
+</p>
+
+<h2>The search engine was dead and the health check was pleased about it</h2>
+
+<p>
+The semantic search over this vault had been silently dead for weeks. Timeouts every session, caused by a blocked install step. Nothing said so. Its own doctor command reported a health score of 45. After I repaired it, the score fell to 15, because the earlier 45 had been computed over checks that never ran.
+</p>
+
+<p>
+A missing check and a passing check look identical from outside. That tool had more of the same shape: its frontmatter fixer rewrote document bodies it had no business touching, its repair for stray quotes wrapped the bad character instead of removing it so the validator then passed over data that was still wrong, and its backup set covered 37 of the 40 files it changed. None of that produced an error. All of it produced a clean exit.
+</p>
+
+<h2>Nobody was using the graph anyway</h2>
+
+<p>
+Before deciding to clean anything up, I ran a pre-registered findability test with three separate agents: one to author the queries, one to answer them, one to grade. Ten targets, including three deliberately hard cross-directory ones.
+</p>
+
+<p>
+Ten of ten found. Median three tool calls. Zero wikilinks followed. Zero broken links encountered. What actually worked was guessing filenames, grepping, and listing directories. The graph I had spent the day measuring, the rot I had panicked about, the hubs, the ablation: none of it was in the retrieval path. It measures agent findability, not human findability, and I would not stretch it further than that. But it means the cleanup I was about to justify on retrieval grounds cannot be justified on retrieval grounds.
+</p>
+
+<h2>The obvious optimization made it worse</h2>
+
+<p>
+The intuitive move with a note collection is to cut it into smaller pieces so search returns something tighter. I measured it. Same search, whole notes against notes split at every subheading:
+</p>
+
+<table border="1" cellpadding="5" cellspacing="0">
+<tr><th></th><th>whole notes (2,368 docs)</th><th>split at subheadings (12,085 docs)</th></tr>
+<tr><td>Recall@5</td><td>94%</td><td>83%</td></tr>
+<tr><td>tokens to read the top 5</td><td>2,870</td><td>908</td></tr>
+</table>
+
+<p>
+Reads get 3.2 times cheaper and recall loses 11 points, against the one mechanism that demonstrably works. On the graph side, links per node fall from 3.17 to 0.62 while the edge set grows 3.9 times: more edges, thinner nodes, worse retrieval. The notes here already average five subheadings each, so the granularity people want from splitting already exists and can be addressed with a section anchor instead. I would flip on one condition: if failures turn out to be precision-bound, where the right note comes back and the reader drowns in the surrounding text, splitting becomes correct.
+</p>
+
+<h2>The filing cabinet</h2>
+
+<p>
+The same day produced two incidents that make the whole exercise look beside the point.
+</p>
+
+<p>
+In the first, an agent spent four to five hours writing a predicate that answers "does this worker's change touch the rules". That predicate already existed, 238 lines of it, committed nine days earlier in a repo where one obvious grep returns 21 files. The new copy was written without reading the old one and lost two fixes the old one exists to hold: git quotes non-ASCII paths, so the new check reports a clean pass on exactly the case it was built to catch, and it had no carve-out for progress notes, so it convicts every worker who writes one. In the second, a full ablation run was voided because prior art already settled the rule it was testing.
+</p>
+
+<p>
+Both prior results were retrievable. The semantic index returns the right node at rank 1 for both, by the obvious query. Neither query was ever issued. The agent's own account:
+</p>
+
+<blockquote>
+Not scope, and not that I could not read the vault. I opened references/harness-engineering/INDEX.md today. I read it, and then I appended to it. I treated your knowledge base as a place to deposit findings rather than a place to be governed by. Node 19 was two lines above where I wrote... Nobody assigned me node 19. I did not go looking.
+</blockquote>
+
+<p>
+The file that would have stopped it was open on the screen. Retrieval distance was zero. So the findability test and the incidents are two halves of one sentence: the vault is findable and nobody looked. Every fix I could have shipped off the audit, better embeddings, link repair, graph traversal, smaller chunks, improves a step that already works. The missing thing is a required query before work starts. My own negative-results ledger opens with the instruction that would have caught both cases: before spending a session on a mechanism, grep here. That is advice in a file, and advice in a file lost twice in one day.
+</p>
+
+<p>
+Two things came out of measuring my vault, and neither is about vaults. A number without its method is a rumour, and you will believe it in proportion to how alarming it is. And a knowledge base nobody is required to consult is a filing cabinet, no matter how good its search gets.
+</p>
+
+
+<hr>
+<p><a class="btn" href="../blog.html">&laquo; Back to blog</a></p>
+
+<p class="footer">
+&copy; 2026 Drake Griffith. All rights reserved.
+</p>
+
+</body>
+</html>
