@@ -12,9 +12,9 @@ Live at: https://drakegriffith.github.io/drakes-website/
 index.html        home page + latest posts
 blog.html         full post list
 about.html        one paragraph + photos
-pledge.html       the No-AI blog hub pledge (manifesto; hub not built yet)
+pledge.html       the No-AI blog hub pledge (manifesto; the hub is live)
 sign.html         signpost only - signing moved to the hub's own /pledge page
-banned.html       the red ban notice (reads the reason from the registry)
+banned.html       static stub pointing at the hub's ban explainer and public record
 mcp.html          how agents should read this site
 links.html        email / github / machine endpoints
 style.css         the entire design system
