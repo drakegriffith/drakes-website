@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>I paid $8 to find out when AI agents should split up work - Drake Griffith</title>
+<link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+<div class="topbar">
+<a class="brand" href="../index.html">Drake Griffith</a>
+<span class="pill">Live</span>
+<span class="spacer"></span>
+<a class="btn" href="mailto:christopherg@actualintelligencelabs.ai">Email Me</a>
+</div>
+
+<p class="nav">
+<a href="../index.html">Home</a>
+<a class="here" href="../blog.html">Blog</a>
+<a href="../about.html">About Me</a>
+<a href="../pledge.html">The Pledge</a>
+<a href="../mcp.html">MCP</a>
+<a href="../links.html">Links</a>
+</p>
+
+<h1>I paid $8 to find out when AI agents should split up work</h1>
+<p class="date">August 25, 2026</p>
+
+<hr>
+
+<p>
+I put $8 of credit on an Anthropic account and ran a small experiment. It used $3.78. The rest is still sitting there, which is the most money I have ever had left over from anything.
+</p>
+
+<p>
+The question: when you have a pile of small jobs for an AI, should one agent do all of them, or should each job get its own agent? An agent here means a model plus the instructions and tools wrapped around it. People argue about this all day. I had not seen it priced.
+</p>
+
+<p>
+The setup. I wrote a quiz of 11 small tasks. Look up a price in a table. Count the letter e in a sentence. Reverse a word. A couple of one-line logic puzzles. One question so easy that if the model gets it wrong, the plumbing is broken, not the model. Each task has one right answer I wrote down in advance, so grading is a text match and no model gets to grade itself.
+</p>
+
+<p>
+Then I ran the quiz two ways on Claude Sonnet.
+</p>
+
+<p>
+Way one: a single call with all 11 tasks in it. One employee, one to-do list.
+</p>
+
+<p>
+Way two: eleven separate calls, one task each. Eleven freelancers who have never met.
+</p>
+
+<p>
+A call is one request to the model and one answer back. It is the unit you get billed for.
+</p>
+
+<p>
+I scored it on tokens per correct answer. A token is the unit models are priced in, about three quarters of a word. Tokens per correct answer instead of tokens per run is price per pound instead of price per bag. A cheap bag with three good apples in it is not cheap.
+</p>
+
+<p>
+I ran each way 13 times. 156 calls total. Two batches: a small one to see if there was an obvious loser, then a bigger one to check I had not fooled myself.
+</p>
+
+<p>
+The single call won by about 9 to 1. Roughly 1,350 tokens per correct answer against roughly 12,350. In money, a third of a cent per correct answer against two and a half cents.
+</p>
+
+<p>
+The freelancers scored higher: 10.5 out of 11 on average against 9.8. Most of the gap was one task, counting letters. The one-employee run got the count wrong the same way most of the time. The fresh-start freelancers got it wrong less often. So splitting up bought about two thirds of a correct answer and paid nine times the price for it.
+</p>
+
+<p>
+Why the gap is so big. Every call to a coding agent carries about 12,000 tokens of fixed overhead before your question is read: its built-in instructions, tool descriptions, house rules. Same size whether you ask for one thing or eleven. Way one paid that toll once per run. Way two paid it eleven times. My whole quiz was about 2,000 tokens. The toll was six times the cargo.
+</p>
+
+<p>
+So, the answer in the title. At this size, do not split up. Splitting is a fixed cost per call. It pays for itself in two cases: each job is big enough that the toll is small next to it, or cramming jobs into one context makes the model worse. A context is everything the model can see at once. Somewhere past 100,000 tokens, models get worse at the middle of it. My quiz was nowhere near that. A night of real coding work might be. This result says nothing about that case.
+</p>
+
+<p>
+One caveat I should say out loud. In way two, a script handed out the tasks and collected the answers. In a real system a model does that job too, and it makes calls of its own. So the freelancer price is a floor. The real number is worse.
+</p>
+
+<p>
+What I want next: the same quiz with tasks big enough to crowd a context, to find the point where the freelancers start winning. That costs more than $8. I know that now because I measured this one.
+</p>
+
+<hr>
+<p><a class="btn" href="../blog.html">&laquo; Back to blog</a></p>
+
+<p class="footer">
+&copy; 2026 Drake Griffith. All rights reserved.
+</p>
+
+</body>
+</html>

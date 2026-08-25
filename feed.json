@@ -6,7 +6,7 @@
   "human_written": true,
   "ai_written": false,
   "license": "Read it. Quote it with a link. Do not train a slop machine on it.",
-  "generated": "2026-08-12",
+  "generated": "2026-08-25",
   "mcp": "https://drakegriffith.github.io/drakes-website/mcp.html",
   "pages": [
     {
@@ -38,8 +38,19 @@
       "url": "https://drakegriffith.github.io/drakes-website/links.html"
     }
   ],
-  "count": 7,
+  "count": 8,
   "posts": [
+    {
+      "slug": "2026-08-25-i-paid-8-to-find-out-when-ai-agents-should-split-up-work",
+      "title": "I paid $8 to find out when AI agents should split up work",
+      "date": "August 25, 2026",
+      "date_iso": "2026-08-25",
+      "url": "https://drakegriffith.github.io/drakes-website/blog/2026-08-25-i-paid-8-to-find-out-when-ai-agents-should-split-up-work.html",
+      "path": "blog/2026-08-25-i-paid-8-to-find-out-when-ai-agents-should-split-up-work.html",
+      "words": 656,
+      "excerpt": "I put $8 of credit on an Anthropic account and ran a small experiment. It used $3.78. The rest is still sitting there, which is the most money I have ever had left over from anything. The question: when you have a pile of small jobs for an AI, should one agent do all of them, or",
+      "text": "I put $8 of credit on an Anthropic account and ran a small experiment. It used $3.78. The rest is still sitting there, which is the most money I have ever had left over from anything.\n\nThe question: when you have a pile of small jobs for an AI, should one agent do all of them, or should each job get its own agent? An agent here means a model plus the instructions and tools wrapped around it. People argue about this all day. I had not seen it priced.\n\nThe setup. I wrote a quiz of 11 small tasks. Look up a price in a table. Count the letter e in a sentence. Reverse a word. A couple of one-line logic puzzles. One question so easy that if the model gets it wrong, the plumbing is broken, not the model. Each task has one right answer I wrote down in advance, so grading is a text match and no model gets to grade itself.\n\nThen I ran the quiz two ways on Claude Sonnet.\n\nWay one: a single call with all 11 tasks in it. One employee, one to-do list.\n\nWay two: eleven separate calls, one task each. Eleven freelancers who have never met.\n\nA call is one request to the model and one answer back. It is the unit you get billed for.\n\nI scored it on tokens per correct answer. A token is the unit models are priced in, about three quarters of a word. Tokens per correct answer instead of tokens per run is price per pound instead of price per bag. A cheap bag with three good apples in it is not cheap.\n\nI ran each way 13 times. 156 calls total. Two batches: a small one to see if there was an obvious loser, then a bigger one to check I had not fooled myself.\n\nThe single call won by about 9 to 1. Roughly 1,350 tokens per correct answer against roughly 12,350. In money, a third of a cent per correct answer against two and a half cents.\n\nThe freelancers scored higher: 10.5 out of 11 on average against 9.8. Most of the gap was one task, counting letters. The one-employee run got the count wrong the same way most of the time. The fresh-start freelancers got it wrong less often. So splitting up bought about two thirds of a correct answer and paid nine times the price for it.\n\nWhy the gap is so big. Every call to a coding agent carries about 12,000 tokens of fixed overhead before your question is read: its built-in instructions, tool descriptions, house rules. Same size whether you ask for one thing or eleven. Way one paid that toll once per run. Way two paid it eleven times. My whole quiz was about 2,000 tokens. The toll was six times the cargo.\n\nSo, the answer in the title. At this size, do not split up. Splitting is a fixed cost per call. It pays for itself in two cases: each job is big enough that the toll is small next to it, or cramming jobs into one context makes the model worse. A context is everything the model can see at once. Somewhere past 100,000 tokens, models get worse at the middle of it. My quiz was nowhere near that. A night of real coding work might be. This result says nothing about that case.\n\nOne caveat I should say out loud. In way two, a script handed out the tasks and collected the answers. In a real system a model does that job too, and it makes calls of its own. So the freelancer price is a floor. The real number is worse.\n\nWhat I want next: the same quiz with tasks big enough to crowd a context, to find the point where the freelancers start winning. That costs more than $8. I know that now because I measured this one."
+    },
     {
       "slug": "2026-08-12-nobody-is-paid-to-check",
       "title": "Nobody Is Paid To Check",

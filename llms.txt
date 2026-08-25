@@ -15,6 +15,7 @@
 
 ## Posts
 
+- [I paid $8 to find out when AI agents should split up work](https://drakegriffith.github.io/drakes-website/blog/2026-08-25-i-paid-8-to-find-out-when-ai-agents-should-split-up-work.html): August 25, 2026, 656 words. I put $8 of credit on an Anthropic account and ran a small experiment. It used $3.78. The rest is still sitting there, which is the most money I have ever had l
 - [Nobody Is Paid To Check](https://drakegriffith.github.io/drakes-website/blog/2026-08-12-nobody-is-paid-to-check.html): August 12, 2026, 1620 words. In April, a small lab audited LoCoMo, one of the most cited benchmarks for testing whether an AI system remembers things across long conversations. A benchmark 
 - [My vault is 53 percent broken, or 12.8 percent, depending on who wrote the resolver](https://drakegriffith.github.io/drakes-website/blog/2026-08-12-my-vault-is-53-percent-broken-or-12-8-percent-depending-on-who-wrote-the-resolver.html): August 12, 2026, 2037 words. I spent a day measuring my own note vault. It is 3,969 markdown files, written partly by me and partly by agents working for me, cross-linked with wikilinks. I 
 - [model-eval: what happens when every model passes](https://drakegriffith.github.io/drakes-website/blog/2026-08-03-model-eval-what-happens-when-every-model-passes.html): August 3, 2026, 2624 words. Every number below traces to the verbatim output of the repo's own stats script ( python3 runner/stats.py ) over the live corpus: 268 result rows, 267 after exc
